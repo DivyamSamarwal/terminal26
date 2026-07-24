@@ -1,5 +1,5 @@
-﻿<div align="center">
-  <h1>ðŸ“ˆ Trading Terminal Simulator (Dalal Street)</h1>
+<div align="center">
+  <h1>📈 Trading Terminal Simulator (Dalal Street)</h1>
   <p><b><i>An ultra-realistic, high-performance, real-time trading terminal simulator built entirely with client-side web technologies and WebRTC Peer-to-Peer multiplayer.</i></b></p>
   
   <div>
@@ -17,31 +17,31 @@
 <hr>
 
 <details>
-<summary><b>ðŸ“‘ Table of Contents</b> (Click to expand)</summary>
+<summary><b>📑 Table of Contents</b> (Click to expand)</summary>
 
-- [ðŸŒŸ The Ultimate Sandbox](#-the-ultimate-sandbox)
-- [ðŸ›  Core Architecture & Tech Stack](#-core-architecture--tech-stack)
-- [ðŸŒ Real-Time Peer-to-Peer Multiplayer](#-real-time-peer-to-peer-multiplayer)
-- [ðŸ“ Project Structure](#-project-structure)
-- [ðŸ§® Simulation Engine & Math Models](#-simulation-engine--math-models)
-- [ðŸ”¥ Every Nudge & Feature](#-every-nudge--feature)
-- [ðŸŽ® How to Play](#-how-to-play)
-- [ðŸ’» Quick Start](#-quick-start)
-- [ðŸš€ Deploying to Vercel](#-deploying-to-vercel)
-- [ðŸ§ª Running Tests](#-running-tests)
-- [ðŸ›¡ Security Note](#-security-note)
-- [ðŸ¤ Contributing](#-contributing)
-- [ðŸ“„ License](#-license)
+- [🌟 The Ultimate Sandbox](#-the-ultimate-sandbox)
+- [🛠 Core Architecture & Tech Stack](#-core-architecture--tech-stack)
+- [🌐 Real-Time Peer-to-Peer Multiplayer](#-real-time-peer-to-peer-multiplayer)
+- [📁 Project Structure](#-project-structure)
+- [🧮 Simulation Engine & Math Models](#-simulation-engine--math-models)
+- [🔥 Every Nudge & Feature](#-every-nudge--feature)
+- [🎮 How to Play](#-how-to-play)
+- [💻 Quick Start](#-quick-start)
+- [🚀 Deploying to Vercel](#-deploying-to-vercel)
+- [🧪 Running Tests](#-running-tests)
+- [🛡 Security Note](#-security-note)
+- [🤝 Contributing](#-contributing)
+- [📄 License](#-license)
 </details>
 
 ---
 
-## ðŸŒŸ The Ultimate Sandbox
-Welcome to **Trading Terminal Simulator**â€”a highly accurate, tick-by-tick financial market microstructure simulator. Engineered for quantitative analysis, strategy backtesting, algorithmic bot development, peer-to-peer multiplayer trading, and educational purposes. It allows users to interact with synthetic markets featuring authentic liquidity constraints, timezone synchronization, dynamic macroeconomic news, Black-Scholes derivatives pricing, interactive Option Chains, technical indicators (VWAP, RSI, MACD, Bollinger Bands), and a living economy with **daily-drifting foreign exchange rates**.
+## 🌟 The Ultimate Sandbox
+Welcome to **Trading Terminal Simulator**—a highly accurate, tick-by-tick financial market microstructure simulator. Engineered for quantitative analysis, strategy backtesting, algorithmic bot development, peer-to-peer multiplayer trading, and educational purposes. It allows users to interact with synthetic markets featuring authentic liquidity constraints, timezone synchronization, dynamic macroeconomic news, Black-Scholes derivatives pricing, interactive Option Chains, technical indicators (VWAP, RSI, MACD, Bollinger Bands), and a living economy with **daily-drifting foreign exchange rates**.
 
 ---
 
-## ðŸ›  Core Architecture & Tech Stack
+## 🛠 Core Architecture & Tech Stack
 
 This application is built from the ground up with a strict focus on **zero-latency execution** and **high-frequency DOM updates**. To achieve this, it relies entirely on native browser APIs without the overhead of heavy frameworks.
 
@@ -50,7 +50,7 @@ This application is built from the ground up with a strict focus on **zero-laten
 *   **Multiplayer Engine**: PeerJS & WebRTC for real-time host-client state broadcasting, order routing, and peer synchronization.
 *   **State Management**: 100% in-memory client-side architecture for blazing fast order matching.
 *   **Rendering & Charting**: Custom batched DOM updates and Canvas/SVG charting supporting Candlesticks, Technical Indicators (RSI, MACD, VWAP, SMA/EMA), and interactive drawing tools.
-*   **Math Utilities**: Pure, side-effect-free math functions extracted into `js/math-utils.js` â€” shared by the simulation engine and the test suite.
+*   **Math Utilities**: Pure, side-effect-free math functions extracted into `js/math-utils.js` — shared by the simulation engine and the test suite.
 *   **Code Quality / Linting**: **ESLint** configured (`eslint.config.mjs`) to ensure strict ECMAScript rules across the codebase.
 
 ```mermaid
@@ -72,7 +72,7 @@ graph TD
 
 ---
 
-## ðŸŒ Real-Time Peer-to-Peer Multiplayer
+## 🌐 Real-Time Peer-to-Peer Multiplayer
 
 The simulator features a serverless **WebRTC Peer-to-Peer Multiplayer System** built using PeerJS:
 
@@ -95,51 +95,51 @@ The **Connection Health** panel is role-aware:
 
 ---
 
-## ðŸ“ Project Structure
+## 📁 Project Structure
 
 The codebase is highly modular, separating core engine logic from UI events, technical indicators, multiplayer networking, and feature modules:
 
 ```text
 tradingterminal/
-â”œâ”€â”€ index.html              # The main single-page application view
-â”œâ”€â”€ studio.html             # The standalone Algorithmic Bot IDE window
-â”œâ”€â”€ server.js               # Node.js static server for local development
-â”œâ”€â”€ start.bat               # One-click Windows launch script
-â”œâ”€â”€ vercel.json             # Vercel deployment config (headers, rewrites, CSP)
-â”œâ”€â”€ README.md               # Documentation
-â”œâ”€â”€ eslint.config.mjs       # Strict linting rules for the codebase
-â”œâ”€â”€ package.json            # Node/NPM dependencies & dev scripts
-â”œâ”€â”€ css/
-â”‚   â””â”€â”€ styles.css          # Core design system, glassmorphism, responsive layout
-â”œâ”€â”€ components/             # Reusable UI view templates (view-terminal, view-multiplayer, etc.)
-â”œâ”€â”€ tests/
-â”‚   â””â”€â”€ indicators.test.js  # Unit tests â€” imports directly from js/math-utils.js
-â””â”€â”€ js/
-    â”œâ”€â”€ app.js              # Core initialization, rendering loop, and state management engine
-    â”œâ”€â”€ bot.js              # Algorithmic Bot execution sandbox & API interfaces
-    â”œâ”€â”€ charts.js           # Canvas/SVG charting (Candlesticks, RSI, MACD, VWAP, Bollinger Bands)
-    â”œâ”€â”€ customization.js    # Themes (Dark, Cyberpunk, Light, Sepia), font selectors, UI preferences
-    â”œâ”€â”€ data.js             # Asset definitions, sector base volumes, fundamental constants
-    â”œâ”€â”€ investments.js      # Mutual Funds, Daily SIP automation, IPO lotteries, Real Estate
-    â”œâ”€â”€ main.js             # Component mounting & entry point bootstrapping
-    â”œâ”€â”€ math-utils.js       # Pure math utilities (SMA, stdNormCDF/PDF, escapeHTML, fmtPrice)
-    â”œâ”€â”€ multiplayer.js      # WebRTC PeerJS multiplayer engine, host/client state sync
-    â”œâ”€â”€ news.js             # Macroeconomic news engine & asset correlation matrix
-    â”œâ”€â”€ options.js          # Black-Scholes pricing model, Option Chains, multi-leg strategies
-    â”œâ”€â”€ storage.js          # localStorage adapter for simulation persistence
-    â”œâ”€â”€ studio.js           # CodeMirror IDE logic for the algorithmic studio
-    â”œâ”€â”€ syndicate.js        # Black Market crate system & insider perk logic
-    â””â”€â”€ ui_events.js        # Global DOM event listeners & user interactions
+├── index.html              # The main single-page application view
+├── studio.html             # The standalone Algorithmic Bot IDE window
+├── server.js               # Node.js static server for local development
+├── start.bat               # One-click Windows launch script
+├── vercel.json             # Vercel deployment config (headers, rewrites, CSP)
+├── README.md               # Documentation
+├── eslint.config.mjs       # Strict linting rules for the codebase
+├── package.json            # Node/NPM dependencies & dev scripts
+├── css/
+│   └── styles.css          # Core design system, glassmorphism, responsive layout
+├── components/             # Reusable UI view templates (view-terminal, view-multiplayer, etc.)
+├── tests/
+│   └── indicators.test.js  # Unit tests — imports directly from js/math-utils.js
+└── js/
+    ├── app.js              # Core initialization, rendering loop, and state management engine
+    ├── bot.js              # Algorithmic Bot execution sandbox & API interfaces
+    ├── charts.js           # Canvas/SVG charting (Candlesticks, RSI, MACD, VWAP, Bollinger Bands)
+    ├── customization.js    # Themes (Dark, Cyberpunk, Light, Sepia), font selectors, UI preferences
+    ├── data.js             # Asset definitions, sector base volumes, fundamental constants
+    ├── investments.js      # Mutual Funds, Daily SIP automation, IPO lotteries, Real Estate
+    ├── main.js             # Component mounting & entry point bootstrapping
+    ├── math-utils.js       # Pure math utilities (SMA, stdNormCDF/PDF, escapeHTML, fmtPrice)
+    ├── multiplayer.js      # WebRTC PeerJS multiplayer engine, host/client state sync
+    ├── news.js             # Macroeconomic news engine & asset correlation matrix
+    ├── options.js          # Black-Scholes pricing model, Option Chains, multi-leg strategies
+    ├── storage.js          # localStorage adapter for simulation persistence
+    ├── studio.js           # CodeMirror IDE logic for the algorithmic studio
+    ├── syndicate.js        # Black Market crate system & insider perk logic
+    └── ui_events.js        # Global DOM event listeners & user interactions
 ```
 
 ---
 
-## ðŸ§® Simulation Engine & Math Models
+## 🧮 Simulation Engine & Math Models
 
 We don't just generate random numbers. The engine simulates a professional trading environment:
 
 *   **Stochastic Calculus (GBM)**: Tick generation mimics Geometric Brownian Motion, factoring in asset-specific volatility and drift.
-*   **Live FX Simulation**: Exchange rates (USD, CNY, JPY, GBP, EUR, HKD, AUD, CAD, CHF) drift Â±0.3% per simulated day using the seeded PCG RNG, capped at Â±15% of their baseline values â€” making cross-currency trades feel dynamic over time.
+*   **Live FX Simulation**: Exchange rates (USD, CNY, JPY, GBP, EUR, HKD, AUD, CAD, CHF) drift ±0.3% per simulated day using the seeded PCG RNG, capped at ±15% of their baseline values — making cross-currency trades feel dynamic over time.
 *   **Order Book & Liquidity**: Level 2 Order Books scale dynamically based on Base Volume. Large market orders *will* suffer from slippage.
 *   **Options Pricing & Greeks**: Dynamic premium decay (Theta) and elasticity (Delta, Gamma, Vega, Rho) calculated using Black-Scholes formulas.
 *   **Technical Analysis Plugins**: Real-time recalculation of VWAP, RSI (14), MACD (12, 26, 9), SMA, EMA, and Bollinger Bands.
@@ -147,57 +147,57 @@ We don't just generate random numbers. The engine simulates a professional tradi
 
 ---
 
-## ðŸ”¥ Every Nudge & Feature
+## 🔥 Every Nudge & Feature
 
-### ðŸ“Š 1. Market Microstructure & Charting
+### 📊 1. Market Microstructure & Charting
 *   **Realistic Liquidity**: Orders consume bid/ask order book depth with dynamic slippage.
 *   **Global Exchanges**: NYSE, NASDAQ, NSE, TSE, HKEX, LSE with timezone synchronization.
 *   **Circuit Breakers**: Extreme volatility triggers upper/lower circuit halts, locking trading until reset.
 *   **Technical Charting**: Candlestick toggle, volume bars, technical indicators (VWAP, RSI, MACD, SMA/EMA, Bollinger Bands), and canvas drawing tools.
 
-### âš¡ 2. Order Execution & High-Contrast UI
+### ⚡ 2. Order Execution & High-Contrast UI
 *   **Order Types**: Market, Limit, Stop, and Stop-Limit orders.
 *   **Time-in-Force (TIF)**: DAY, Immediate or Cancel (IOC), Fill or Kill (FOK).
 *   **Modern Action Controls**: Redesigned glowing emerald **BUY** and rose crimson **SELL / SHORT** buttons with high visibility and subtle micro-animations.
 *   **Margin & Risk**: Strict position caps, margin locks, trailing stop-losses (TSL), target auto-squareoff, short selling escrows, and live P&L tracking.
 
-### ðŸŒ 3. Real-Time WebRTC Multiplayer
+### 🌐 3. Real-Time WebRTC Multiplayer
 *   **Host or Join Markets**: Share 4-digit room codes to host multi-trader sessions.
 *   **Shared Market Clock**: Client clocks pause automatically and sync to the host's tick speed.
 *   **Remote Order Execution**: Client orders route to the host's matching engine with instant fill confirmation, partial fill auto-retry, or rejection feedback.
 
-### ðŸ“‰ 4. Derivatives & Option Chains
+### 📉 4. Derivatives & Option Chains
 *   **Calls & Puts**: Trade synthetic option contracts across strike prices.
 *   **Interactive Option Chain**: Visual option chain modal showing live strike prices, bids, asks, and volume.
 *   **Multi-Leg Strategies**: Execute Straddles, Strangles, Bull/Bear Spreads, and Iron Condors with auto-calculated margin requirements.
 *   **Live Greeks**: Monitor real-time Delta, Gamma, Theta, Vega, and Rho tick-by-tick.
 
-### ðŸ¤– 5. Algorithmic Bot Studio
+### 🤖 5. Algorithmic Bot Studio
 *   **Embedded IDE**: CodeMirror IDE for building automated trading algorithms.
 *   **JavaScript Sandbox**: Access tick streams, technical indicators, and portfolio API.
 *   **Backtesting & HFT Models**: Pre-built momentum and mean-reversion strategies with backtest visualizations.
 
-### ðŸ¦ 6. Dalal Bank & Credit System
-*   **CIBIL Credit Score**: Dynamic credit rating (300â€“900) based on financial discipline.
+### 🏦 6. Dalal Bank & Credit System
+*   **CIBIL Credit Score**: Dynamic credit rating (300–900) based on financial discipline.
 *   **Margin Loans & Foreclosure**: High-leverage loans with daily EMI deductions and early foreclosure options.
 *   **Fixed Deposits**: Park excess capital in FDs with risk-free compounding returns and premature break options.
 *   **Automatic Liquidations**: Margin call default triggers asset liquidation.
 
-### ðŸ™ï¸ 7. Alternative Investments
+### 🏙️ 7. Alternative Investments
 *   **IPOs**: Bid for lotteries in upcoming initial public offerings with allotment notifications.
 *   **Mutual Funds & Daily SIPs**: Invest in global equity, debt, and index funds with automated Systematic Investment Plans (SIPs).
 *   **Real Estate Portfolio**: Purchase residential and commercial properties globally to collect recurring rental income.
 
-### ðŸ•¶ï¸ 8. The Syndicate (Black Market)
+### 🕶️ 8. The Syndicate (Black Market)
 *   **Crates & Loot Boxes**: Unlock Bronze, Silver, or Gold crates for random market perks.
 *   **Insider Buffs**: Activate temporary perks like **Brokerage Holiday**, **Circuit Override**, or **Privileged News Access**.
 
-### ðŸ“° 9. Dynamic Macro News Engine
+### 📰 9. Dynamic Macro News Engine
 *   **Correlated Shocks**: Live news ticker firing macroeconomic events that directly trigger market rallies or crashes.
 
 ---
 
-## ðŸŽ® How to Play
+## 🎮 How to Play
 
 1.  **The Daily Cycle**: Trade during market hours, then click **Start Next Day** to process settlements, option decay, and loan EMIs.
 2.  **Order Execution**: Enter quantity, set Stop-Loss or Target, and click the emerald **BUY** or crimson **SELL / SHORT** buttons.
@@ -206,7 +206,7 @@ We don't just generate random numbers. The engine simulates a professional tradi
 
 ---
 
-## ðŸ’» Quick Start
+## 💻 Quick Start
 
 No database or build setup required. Just pure client-side power.
 
@@ -250,33 +250,33 @@ the optional `server.js` is for local development and is not used in hosting.
 
 ---
 
-## ðŸš€ Deploying to Vercel
+## 🚀 Deploying to Vercel
 
 This project is a **zero-build static site** and deploys to Vercel with no configuration needed beyond what's already in `vercel.json`.
 
 ```bash
-# Option A â€” Vercel CLI
+# Option A — Vercel CLI
 npx vercel login
 npx vercel --prod
 ```
 
-**Option B â€” GitHub Integration (recommended)**
+**Option B — GitHub Integration (recommended)**
 1. Push the repository to GitHub
-2. Go to [vercel.com](https://vercel.com) â†’ **New Project** â†’ Import your repo
-3. Leave all build settings blank â€” Vercel will detect the static site automatically
-4. Click **Deploy** âœ…
+2. Go to [vercel.com](https://vercel.com) → **New Project** → Import your repo
+3. Leave all build settings blank — Vercel will detect the static site automatically
+4. Click **Deploy** ✅
 
 The `vercel.json` already configures:
-- `/studio` clean URL rewrite â†’ `studio.html`
+- `/studio` clean URL rewrite → `studio.html`
 - Cache-Control headers for `/js/` and `/css/` assets
 - Content-Security-Policy allowing PeerJS WebRTC connections
 - `X-Frame-Options: DENY` and `X-Content-Type-Options: nosniff` security headers
 
 ---
 
-## ðŸ§ª Running Tests
+## 🧪 Running Tests
 
-The test suite imports directly from `js/math-utils.js` â€” the shared source of truth for pure math utilities â€” so tests always validate production code, never a hand-rolled duplicate.
+The test suite imports directly from `js/math-utils.js` — the shared source of truth for pure math utilities — so tests always validate production code, never a hand-rolled duplicate.
 
 ```bash
 npm test
@@ -286,7 +286,7 @@ Current coverage: **11 tests** across SMA sliding window, Black-Scholes CDF/PDF,
 
 ---
 
-## ðŸ›¡ Security Note
+## 🛡 Security Note
 
 *   **XSS Prevention**: All user-facing dynamic content uses `escapeHTML()` or safe `textContent`/`createElement` DOM APIs. News items from multiplayer peers are built entirely with DOM nodes, never `innerHTML`.
 *   **Ticker Injection Guard**: Bot stat table rows escape ticker names before interpolating them into `onclick` attribute strings.
@@ -296,6 +296,5 @@ Current coverage: **11 tests** across SMA sliding window, Black-Scholes CDF/PDF,
 
 ---
 
-## ðŸ“„ License
+## 📄 License
 This project is licensed under the MIT License - see the `LICENSE` file for details.
-
