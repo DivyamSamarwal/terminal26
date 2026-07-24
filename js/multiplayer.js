@@ -19,12 +19,15 @@ let _syncJustApplied = false;
 // Bug 6 fix: handle for the join-timeout so it can be cancelled on success/error
 let _joinTimeoutHandle = null;
 let _latencyInterval = null;
+let _hostLatencyInterval = null;
 let _healthInterval = null;
 let _latencySamples = [];
 let _lastHostTickAt = null;
 let _marketSynced = false;
 let _sessionStartedAt = null;
 let _connectionRoute = "--";
+const PEER_HEARTBEAT_TIMEOUT_MS = 15000;
+const _lastPeerResponseAt = new WeakMap();
 
 // Called by app.js whenever a news item fires, so we can piggyback it on the next tick
 export function queueNewsForBroadcast(newsItem) {
@@ -94,10 +97,11 @@ function getJitter() {
 function renderConnectionDetails() {
     const jitter = getJitter();
     const lastTickAge = _lastHostTickAt === null ? "--" : Math.max(0, (Date.now() - _lastHostTickAt) / 1000).toFixed(1) + "s ago";
-    setHealthDetail("mp-route-text", "Route: " + _connectionRoute);
+    const hostPeerStatus = clientConnections.length === 0 ? "Waiting for peer" : _connectionRoute;
+    setHealthDetail("mp-route-text", "Route: " + (isMultiplayerHost ? hostPeerStatus : _connectionRoute));
     setHealthDetail("mp-jitter-text", "Jitter: " + (jitter === null ? "--" : "±" + jitter + " ms"));
     setHealthDetail("mp-last-tick-text", "Last host tick: " + lastTickAge);
-    setHealthDetail("mp-sync-text", "Market state: " + (_marketSynced ? "Synced" : "Syncing..."));
+    setHealthDetail("mp-sync-text", "Market state: " + (isMultiplayerHost ? "Broadcasting" : (_marketSynced ? "Synced" : "Syncing...")));
     setHealthDetail("mp-session-text", "Session: " + (_sessionStartedAt === null ? "--" : formatSessionDuration(Date.now() - _sessionStartedAt)));
 }
 
@@ -121,6 +125,33 @@ function startHealthTimer() {
     }, 1000);
 }
 
+function startHostLatencyProbe() {
+    if (_hostLatencyInterval) clearInterval(_hostLatencyInterval);
+    const pingClients = () => {
+        [...clientConnections].forEach(conn => {
+            const lastResponse = _lastPeerResponseAt.get(conn) || 0;
+            if (!conn.open || Date.now() - lastResponse > PEER_HEARTBEAT_TIMEOUT_MS) {
+                try { conn.close(); } catch (_) {}
+                removeClientConnection(conn, "Connection to a trader timed out.");
+                return;
+            }
+            conn.send(JSON.stringify({ type: 'HOST_PING', sentAt: Date.now() }));
+        });
+    };
+    pingClients();
+    _hostLatencyInterval = setInterval(pingClients, 5000);
+}
+
+function removeClientConnection(conn, message) {
+    const index = clientConnections.indexOf(conn);
+    if (index === -1) return;
+    clientConnections.splice(index, 1);
+    if (clientConnections.length === 0) _connectionRoute = "Waiting for peer";
+    notify("Trader Left", message || "A trader disconnected from your market.", "info");
+    updateClientList();
+    renderConnectionDetails();
+}
+
 function stopLatencyProbe() {
     if (_latencyInterval) {
         clearInterval(_latencyInterval);
@@ -130,10 +161,15 @@ function stopLatencyProbe() {
         clearInterval(_healthInterval);
         _healthInterval = null;
     }
+    if (_hostLatencyInterval) {
+        clearInterval(_hostLatencyInterval);
+        _hostLatencyInterval = null;
+    }
 }
 
 async function detectConnectionRoute() {
-    const connection = hostConnection && hostConnection.peerConnection;
+    const connectionSource = hostConnection || clientConnections[0];
+    const connection = connectionSource && connectionSource.peerConnection;
     if (!connection || typeof connection.getStats !== "function") return;
     try {
         const stats = await connection.getStats();
@@ -192,10 +228,13 @@ export function hostGame() {
         notify("Hosting Started", "Room code: " + id + "\nShare this with others!", "success");
         updateUIConnected("Host", id);
         startHealthTimer();
+        startHostLatencyProbe();
     });
 
     peer.on('connection', (conn) => {
         clientConnections.push(conn);
+        _lastPeerResponseAt.set(conn, Date.now());
+        _connectionRoute = "Checking...";
         notify("Trader Joined", "A new trader connected to your market!", "success");
         updateClientList();
 
@@ -221,19 +260,23 @@ export function hostGame() {
             };
             conn.send(JSON.stringify(fullState));
         };
-        if (conn.open) syncFn();
-        else conn.on('open', syncFn);
+        const onClientOpen = () => {
+            syncFn();
+            startHostLatencyProbe();
+            detectConnectionRoute();
+            renderConnectionDetails();
+        };
+        if (conn.open) onClientOpen();
+        else conn.on('open', onClientOpen);
+        detectConnectionRoute();
+        renderConnectionDetails();
 
         conn.on('data', (data) => {
             handleClientData(conn, data);
         });
 
         conn.on('close', () => {
-            // Bug 2 fix: mutate in-place so external references stay valid
-            let idx = clientConnections.indexOf(conn);
-            if (idx !== -1) clientConnections.splice(idx, 1);
-            notify("Trader Left", "A trader disconnected from your market.", "info");
-            updateClientList();
+            removeClientConnection(conn);
         });
     });
 
@@ -412,6 +455,7 @@ export function disconnect() {
 
 export function broadcastMarketTick(stateObj, stocksArr) {
     if (!isMultiplayerHost) return;
+    _lastHostTickAt = Date.now();
     if (clientConnections.length === 0) {
         _pendingNews.splice(0); // Bug D fix: flush stale news if no clients (splice in-place for consistency)
         return;
@@ -465,7 +509,9 @@ export function broadcastMarketTick(stateObj, stocksArr) {
 function handleHostData(dataStr) {
     try {
         let msg = JSON.parse(dataStr);
-        if (msg.type === 'PONG' && typeof msg.sentAt === 'number') {
+        if (msg.type === 'HOST_PING' && typeof msg.sentAt === 'number') {
+            if (hostConnection && hostConnection.open) hostConnection.send(JSON.stringify({ type: 'HOST_PONG', sentAt: msg.sentAt }));
+        } else if (msg.type === 'PONG' && typeof msg.sentAt === 'number') {
             const latency = Math.max(0, Date.now() - msg.sentAt);
             _latencySamples.push(latency);
             if (_latencySamples.length > 12) _latencySamples.shift();
@@ -648,7 +694,14 @@ function handleClientData(conn, dataStr) {
     if (!conn.open) return;
     try {
         let msg = JSON.parse(dataStr);
-        if (msg.type === 'PING' && typeof msg.sentAt === 'number') {
+        if (msg.type === 'HOST_PONG' && typeof msg.sentAt === 'number') {
+            _lastPeerResponseAt.set(conn, Date.now());
+            const latency = Math.max(0, Date.now() - msg.sentAt);
+            _latencySamples.push(latency);
+            if (_latencySamples.length > 12) _latencySamples.shift();
+            setConnectionHealth("Connection: Stable · " + clientConnections.length + " client" + (clientConnections.length === 1 ? "" : "s") + " · Ping: " + latency + " ms");
+            renderConnectionDetails();
+        } else if (msg.type === 'PING' && typeof msg.sentAt === 'number') {
             conn.send(JSON.stringify({ type: 'PONG', sentAt: msg.sentAt }));
         } else if (msg.type === 'PLACE_ORDER') {
             // Host logic: Execute the client's market order against current limits

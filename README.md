@@ -81,7 +81,17 @@ The simulator features a serverless **WebRTC Peer-to-Peer Multiplayer System** b
 *   **Client Clock Suspension**: Client simulation intervals automatically pause (`window._stopClientClockFn`) while connected to follow the host's market clock, resuming cleanly upon disconnect (`window._restartClockFn`).
 *   **Host Order Matching**: Clients dispatch order requests (`PLACE_ORDER`) over WebRTC. The host validates margin, circuit halts, and liquidity, responding with `ORDER_FILLED`, `ORDER_REJECTED`, or `PARTIAL_FILL` messages.
 *   **Auto-Retry Partial Fills**: Partial fills unlock margin proportionally and assign a pre-generated retry ID to cleanly handle unfilled quantity retries without double-execution race conditions.
-*   **Resilient WebRTC Lifecycle**: Features 12-second join timeout guards, atomic news draining, duplicate tick push guards, and XSS-safe DOM node creation.
+*   **Connection Health**: The session panel reports measured ping, jitter, route (`Direct P2P` or `TURN relay` where browser stats are available), last host tick, synchronization state, session duration, and host-side connected-client status.
+*   **Resilient WebRTC Lifecycle**: Features 12-second join timeout guards, atomic news draining, duplicate tick push guards, XSS-safe DOM node creation, immediate peer-close cleanup, and a 15-second heartbeat timeout for peers that disappear without sending a close event.
+
+### Multiplayer Network Notes
+
+The host is the browser that creates the room; it must remain open for the session to continue. Multiplayer connections use WebRTC. Most networks connect directly, but restrictive networks, VPNs, and some carrier-grade NAT configurations may require a TURN relay. A GitHub Pages deployment hosts the static app only and does not itself provide a TURN server.
+
+The **Connection Health** panel is role-aware:
+
+* **Clients** see the measured round-trip ping to the host, jitter derived from recent pings, time since the last received host tick, sync status, route detection, and session duration.
+* **Hosts** see active client count, host-to-client ping and jitter, broadcast activity, route detection for an active peer, and session duration. Disconnected or unresponsive peers are removed from the peer list automatically.
 
 ---
 
