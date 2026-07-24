@@ -18,6 +18,13 @@ let _syncJustApplied = false;
 
 // Bug 6 fix: handle for the join-timeout so it can be cancelled on success/error
 let _joinTimeoutHandle = null;
+let _latencyInterval = null;
+let _healthInterval = null;
+let _latencySamples = [];
+let _lastHostTickAt = null;
+let _marketSynced = false;
+let _sessionStartedAt = null;
+let _connectionRoute = "--";
 
 // Called by app.js whenever a news item fires, so we can piggyback it on the next tick
 export function queueNewsForBroadcast(newsItem) {
@@ -50,6 +57,102 @@ function updateUIConnected(role, code) {
     let sc = document.getElementById("mp-status-card"); if (sc) sc.style.display = "block";
     let rt = document.getElementById("mp-role-text"); if (rt) rt.innerText = "Role: " + role;
     let cd = document.getElementById("mp-room-code-display"); if (cd) cd.innerText = code;
+    _sessionStartedAt = Date.now();
+    _lastHostTickAt = null;
+    _marketSynced = role === "Host";
+    _connectionRoute = role === "Host" ? "Waiting for peer" : "Checking...";
+    _latencySamples = [];
+    setConnectionHealth(role === "Client" ? "Connection: Measuring ping..." : "Connection: Stable · Hosting");
+    renderConnectionDetails();
+}
+
+function setConnectionHealth(message) {
+    const health = document.getElementById("mp-health-text");
+    if (health) health.textContent = message;
+}
+
+function setHealthDetail(id, text) {
+    const element = document.getElementById(id);
+    if (element) element.textContent = text;
+}
+
+function formatSessionDuration(milliseconds) {
+    const seconds = Math.floor(milliseconds / 1000);
+    const minutes = Math.floor(seconds / 60);
+    const hours = Math.floor(minutes / 60);
+    const remainingSeconds = String(seconds % 60).padStart(2, "0");
+    return (hours > 0 ? hours + "h " : "") + (minutes % 60) + "m " + remainingSeconds + "s";
+}
+
+function getJitter() {
+    if (_latencySamples.length < 2) return null;
+    const average = _latencySamples.reduce((sum, value) => sum + value, 0) / _latencySamples.length;
+    const variance = _latencySamples.reduce((sum, value) => sum + Math.pow(value - average, 2), 0) / _latencySamples.length;
+    return Math.round(Math.sqrt(variance));
+}
+
+function renderConnectionDetails() {
+    const jitter = getJitter();
+    const lastTickAge = _lastHostTickAt === null ? "--" : Math.max(0, (Date.now() - _lastHostTickAt) / 1000).toFixed(1) + "s ago";
+    setHealthDetail("mp-route-text", "Route: " + _connectionRoute);
+    setHealthDetail("mp-jitter-text", "Jitter: " + (jitter === null ? "--" : "±" + jitter + " ms"));
+    setHealthDetail("mp-last-tick-text", "Last host tick: " + lastTickAge);
+    setHealthDetail("mp-sync-text", "Market state: " + (_marketSynced ? "Synced" : "Syncing..."));
+    setHealthDetail("mp-session-text", "Session: " + (_sessionStartedAt === null ? "--" : formatSessionDuration(Date.now() - _sessionStartedAt)));
+}
+
+function startLatencyProbe() {
+    stopLatencyProbe();
+    const pingHost = () => {
+        if (!hostConnection || !hostConnection.open) return;
+        hostConnection.send(JSON.stringify({ type: 'PING', sentAt: Date.now() }));
+    };
+    pingHost();
+    _latencyInterval = setInterval(pingHost, 5000);
+    startHealthTimer();
+    detectConnectionRoute();
+}
+
+function startHealthTimer() {
+    if (_healthInterval) clearInterval(_healthInterval);
+    _healthInterval = setInterval(() => {
+        renderConnectionDetails();
+        detectConnectionRoute();
+    }, 1000);
+}
+
+function stopLatencyProbe() {
+    if (_latencyInterval) {
+        clearInterval(_latencyInterval);
+        _latencyInterval = null;
+    }
+    if (_healthInterval) {
+        clearInterval(_healthInterval);
+        _healthInterval = null;
+    }
+}
+
+async function detectConnectionRoute() {
+    const connection = hostConnection && hostConnection.peerConnection;
+    if (!connection || typeof connection.getStats !== "function") return;
+    try {
+        const stats = await connection.getStats();
+        let selectedPair = null;
+        stats.forEach(report => {
+            if (report.type === "candidate-pair" && (report.selected || (report.nominated && report.state === "succeeded"))) {
+                selectedPair = report;
+            }
+        });
+        if (!selectedPair) return;
+        const local = stats.get(selectedPair.localCandidateId);
+        const remote = stats.get(selectedPair.remoteCandidateId);
+        _connectionRoute = (local && local.candidateType === "relay") || (remote && remote.candidateType === "relay")
+            ? "TURN relay"
+            : "Direct P2P";
+        renderConnectionDetails();
+    } catch (_) {
+        // Route inspection is optional; the data connection continues normally.
+    }
 }
 
 function updateUIDisconnected() {
@@ -88,6 +191,7 @@ export function hostGame() {
         isMultiplayerClient = false;
         notify("Hosting Started", "Room code: " + id + "\nShare this with others!", "success");
         updateUIConnected("Host", id);
+        startHealthTimer();
     });
 
     peer.on('connection', (conn) => {
@@ -186,6 +290,7 @@ export function joinGame() {
 
             notify("Connected!", "Joined host market: " + code, "success");
             updateUIConnected("Client", code);
+            startLatencyProbe();
             updateClientList();
         });
 
@@ -253,6 +358,12 @@ export function disconnect() {
         clearTimeout(_joinTimeoutHandle);
         _joinTimeoutHandle = null;
     }
+    stopLatencyProbe();
+    _latencySamples = [];
+    _lastHostTickAt = null;
+    _marketSynced = false;
+    _sessionStartedAt = null;
+    _connectionRoute = "--";
 
     // Bug 1 fix: only restart the local clock if WE were the client
     const wasClient = isMultiplayerClient;
@@ -354,7 +465,13 @@ export function broadcastMarketTick(stateObj, stocksArr) {
 function handleHostData(dataStr) {
     try {
         let msg = JSON.parse(dataStr);
-        if (msg.type === 'MARKET_TICK') {
+        if (msg.type === 'PONG' && typeof msg.sentAt === 'number') {
+            const latency = Math.max(0, Date.now() - msg.sentAt);
+            _latencySamples.push(latency);
+            if (_latencySamples.length > 12) _latencySamples.shift();
+            setConnectionHealth("Connection: Stable · Ping: " + latency + " ms");
+            renderConnectionDetails();
+        } else if (msg.type === 'MARKET_TICK') {
             applyHostTickToClient(msg);
         } else if (msg.type === 'ORDER_FILLED') {
             // Bug B fix: handle order filled
@@ -398,6 +515,7 @@ function handleHostData(dataStr) {
                 if (window.renderAllFromClient) window.renderAllFromClient();
             }
         } else if (msg.type === 'SYNC_STATE') {
+            _marketSynced = true;
             msg.stocks.forEach(hs => {
                 let localStock = stockMap ? stockMap[hs.ticker] : marketStocks.find(s => s.ticker === hs.ticker);
                 if (localStock) {
@@ -530,7 +648,9 @@ function handleClientData(conn, dataStr) {
     if (!conn.open) return;
     try {
         let msg = JSON.parse(dataStr);
-        if (msg.type === 'PLACE_ORDER') {
+        if (msg.type === 'PING' && typeof msg.sentAt === 'number') {
+            conn.send(JSON.stringify({ type: 'PONG', sentAt: msg.sentAt }));
+        } else if (msg.type === 'PLACE_ORDER') {
             // Host logic: Execute the client's market order against current limits
             if (typeof msg.qty !== 'number' || isNaN(msg.qty) || msg.qty <= 0) {
                 if (conn.open) conn.send(JSON.stringify({ type: 'ORDER_REJECTED', reason: 'Invalid quantity', id: msg.id }));
@@ -611,6 +731,7 @@ function handleClientData(conn, dataStr) {
 // Apply the received tick data to the client's local marketStocks array
 function applyHostTickToClient(msg) {
     if (!marketStocks) return;
+    _lastHostTickAt = Date.now();
     
     // Sync state time/day
     if (window._tickClientEngine) {
