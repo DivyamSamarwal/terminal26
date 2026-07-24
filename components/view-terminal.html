@@ -1,0 +1,497 @@
+<div id="view-terminal">
+            <div class="main-grid">
+            <!-- Watchlist -->
+            <aside class="watchlist-panel">
+                <div class="sec-header" style="display:flex; justify-content:space-between; align-items:center;">
+        <div><i class="fa-solid fa-list-ul"></i> Watchlist <span class="wl-stock-count" id="wl-count"></span></div>
+        <button id="mobile-wl-close" style="background:transparent; border:none; color:var(--text-dim); font-size:16px; cursor:pointer;" class="mobile-only-btn"><i class="fa-solid fa-times"></i></button>
+    </div>
+                <div class="wl-search-wrap">
+                    <i class="fa-solid fa-magnifying-glass wl-search-icon"></i>
+                    <input type="text" id="wl-search-input" class="wl-search-input" placeholder="Search symbol, sector..." autocomplete="off">
+                    <i class="fa-solid fa-times wl-clear-icon" id="wl-clear-btn" style="display:none; cursor:pointer; position:absolute; right:10px; top:50%; transform:translateY(-50%); color:var(--text-dim);"></i>
+                </div>
+                <div class="wl-market-filters">
+                    <button class="wl-mf-btn active" data-market="ALL">All</button>
+                    <button class="wl-mf-btn" data-market="INDEX">Index</button>
+                    <button class="wl-mf-btn" data-market="BOND">Bond</button>
+                    <button class="wl-mf-btn" data-market="NSE">NSE</button>
+                    <button class="wl-mf-btn" data-market="NASDAQ">NASDAQ</button>
+                    <button class="wl-mf-btn" data-market="EU">EU</button>
+                    <button class="wl-mf-btn" data-market="SSE">SSE</button>
+                    <button class="wl-mf-btn" data-market="TSE">TSE</button>
+                    <button class="wl-mf-btn" data-market="HKEX">HKEX</button>
+                    <button class="wl-mf-btn" data-market="COMM">Comm</button>
+                    <button class="wl-mf-btn" data-market="CRYPTO">Crypto</button>
+                    <button class="wl-mf-btn" data-market="FX">FX</button>
+                    <button class="wl-mf-btn" data-market="HEATMAP" style="color:var(--orange);"><i class="fa-solid fa-border-all"></i> Heatmap</button>
+                </div>
+                <div class="wl-head">
+                    <span class="wl-h-sym">Symbol</span>
+                    <span class="wl-h-ltp">LTP</span>
+                    <span class="wl-h-chg">Chg%</span>
+                </div>
+                <div class="wl-body" id="watchlist"></div>
+            </aside>
+
+            <!-- Center -->
+            <main class="center-panel">
+                <!-- Active stock header -->
+                <div class="chart-topbar">
+                    <div class="ct-left">
+                        <div style="display: flex; align-items: center; gap: 8px;">
+                            <h2 class="ct-symbol" id="active-symbol">RELIANCE</h2>
+                            <span class="market-status" id="market-status-badge" style="font-size: 9px; font-weight: 800; padding: 2px 6px; border-radius: 4px; letter-spacing: 0.5px;"></span>
+                        </div>
+                        <span class="ct-name" id="active-name">Reliance Industries</span>
+                    </div>
+                    <div class="ct-chart-type">
+                        <div class="segmented-control">
+                            <button class="chart-type-btn active" id="btn-chart-line" title="Line Chart"><i class="fa-solid fa-chart-line"></i> <span>Line</span></button>
+                            <button class="chart-type-btn" id="btn-chart-candle" title="Candlestick Chart"><span>&#8718; Candles</span></button>
+                        </div>
+                        <div class="segmented-control">
+                            <button class="chart-type-btn scale-btn active" id="btn-scale-linear" title="Linear price scale"><span>Linear</span></button>
+                            <button class="chart-type-btn scale-btn" id="btn-scale-log" title="Logarithmic price scale"><span>Log</span></button>
+                            <button class="chart-type-btn scale-btn" id="btn-scale-pct" title="% Change from view start"><span>%Chg</span></button>
+                        </div>
+                        <div class="segmented-control">
+                             <button class="chart-type-btn indicator-btn" id="btn-toggle-sma" title="Toggle SMA (20)"><span>SMA</span></button>
+                             <button class="chart-type-btn indicator-btn" id="btn-toggle-ema" title="Toggle EMA (20)"><span>EMA</span></button>
+                             <button class="chart-type-btn indicator-btn" id="btn-toggle-bb" title="Toggle Bollinger Bands (20, 2)"><span>BB</span></button>
+                             <button class="chart-type-btn indicator-btn" id="btn-toggle-vwap" title="Toggle VWAP"><span>VWAP</span></button>
+                             <button class="chart-type-btn indicator-btn" id="btn-toggle-rsi" title="Toggle RSI (14)"><span>RSI</span></button>
+                             <button class="chart-type-btn indicator-btn" id="btn-toggle-macd" title="Toggle MACD (12,26,9)"><span>MACD</span></button>
+                        </div>
+                        <div class="segmented-control">
+                            <button class="chart-type-btn" id="btn-toggle-analytics" title="Stock Analytics & Fundamentals"><span><i class="fa-solid fa-chart-pie"></i> Analytics</span></button>
+                        </div>
+                        <div class="segmented-control layout-selector">
+                            <button class="chart-type-btn active" id="btn-layout-1x" title="Single Chart"><span><i class="fa-solid fa-square"></i></span></button>
+                            <button class="chart-type-btn" id="btn-layout-2x" title="2x Split"><span><i class="fa-solid fa-table-columns"></i></span></button>
+                            <button class="chart-type-btn" id="btn-layout-4x" title="4x Grid"><span><i class="fa-solid fa-table-cells"></i></span></button>
+                        </div>
+                    </div>
+
+                    <div class="ct-right">
+                        <span class="ct-price" id="active-price">2500.00</span>
+                        <span class="ct-change up" id="active-change">+12.50 (0.50%)</span>
+                        <span class="ct-prev-close" id="active-prev-close">Prev Close: 2487.50 (+0.50%)</span>
+                    </div>
+                </div>
+
+                <!-- Chart -->
+                <div class="chart-container">
+                    <!-- Drawing Toolbar -->
+                    <div class="drawing-toolbar" id="drawing-toolbar">
+                        <button class="draw-btn active" id="draw-cursor" title="Cursor / Pan" data-tool="cursor">
+                            <i class="fa-solid fa-arrow-pointer"></i>
+                        </button>
+                        <button class="draw-btn" id="draw-trendline" title="Trendline" data-tool="trendline">
+                            <i class="fa-solid fa-chart-line"></i>
+                        </button>
+                        <button class="draw-btn" id="draw-hline" title="Horizontal Support / Resistance" data-tool="hline">
+                            <i class="fa-solid fa-minus"></i>
+                        </button>
+                        <button class="draw-btn" id="draw-fib" title="Fibonacci Retracement" data-tool="fib">
+                            <i class="fa-solid fa-wave-square"></i>
+                        </button>
+                        <div class="draw-sep"></div>
+                        <button class="draw-btn draw-clear" id="draw-clear" title="Clear All Drawings">
+                            <i class="fa-solid fa-trash-can"></i>
+                        </button>
+                    </div>
+
+                    <!-- Main Chart Grid Container -->
+                    <div id="chart-grid-container" class="chart-grid-1x">
+                        <div class="chart-panel" id="panel-0">
+                            <canvas id="main-chart" role="img" aria-label="Price chart for the selected instrument"></canvas>
+                        </div>
+                    </div>
+
+                    <!-- Sub-chart (RSI / MACD) -->
+                    <div id="sub-chart-container" class="hidden">
+                        <div class="sub-chart-header">
+                            <span id="sub-chart-label">RSI (14)</span>
+                            <span class="sub-chart-ref">— 70 Overbought &nbsp;&nbsp; — 30 Oversold</span>
+                        </div>
+                        <canvas id="sub-chart"></canvas>
+                    </div>
+
+                    <div class="chart-time-selector">
+                        <div class="chart-view-lengths">
+                            <button class="tf-btn active" id="tf-1D">1D</button>
+                            <button class="tf-btn" id="tf-1W">1W</button>
+                            <button class="tf-btn" id="tf-1M">1M</button>
+                        </div>
+                        <div class="chart-interval-selector custom-dropdown" id="custom-interval-dropdown">
+                            <span class="dropdown-label">Interval:</span>
+                            <div class="dropdown-selected" id="chart-interval-selected">
+                                <span id="interval-display">5m</span>
+                                <i class="fa-solid fa-chevron-down" style="font-size: 8px; margin-left: 4px;"></i>
+                            </div>
+                            <div class="dropdown-options" id="chart-interval-options">
+                                <div class="dropdown-option active" data-value="5">5m</div>
+                                <div class="dropdown-option" data-value="15">15m</div>
+                                <div class="dropdown-option" data-value="30">30m</div>
+                                <div class="dropdown-option" data-value="60">1h</div>
+                                <div class="dropdown-option" data-value="375">1d</div>
+                                <div class="dropdown-option" data-value="1875">1w</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- News Feed -->
+                <div class="news-panel">
+                    <div class="news-header">
+                        <span><i class="fa-solid fa-newspaper accent"></i> Live News Feed</span>
+                        <span class="mono news-badge" id="news-count">0</span>
+                    </div>
+                    <div class="news-market-filters">
+                        <button class="news-mf-btn active" data-market="ALL"><span>All</span></button>
+                        <button class="news-mf-btn" data-market="INDEX"><span>Index</span></button>
+                        <button class="news-mf-btn" data-market="BOND"><span>Bond</span></button>
+                        <button class="news-mf-btn" data-market="NSE"><span>NSE</span></button>
+                        <button class="news-mf-btn nmf-nasdaq" data-market="NASDAQ"><span>NASDAQ</span></button>
+                        <button class="news-mf-btn nmf-eu" data-market="EU"><span>EU</span></button>
+                        <button class="news-mf-btn nmf-sse" data-market="SSE"><span>SSE</span></button>
+                        <button class="news-mf-btn nmf-tse" data-market="TSE"><span>TSE</span></button>
+                        <button class="news-mf-btn nmf-hkex" data-market="HKEX"><span>HKEX</span></button>
+                        <button class="news-mf-btn nmf-comm" data-market="COMM"><span>Comm</span></button>
+                        <button class="news-mf-btn nmf-crypto" data-market="CRYPTO"><i class="fa-brands fa-bitcoin"></i> <span>Crypto</span></button>
+                        <button class="news-mf-btn nmf-fx" data-market="FX"><span>FX</span></button>
+                        <button class="news-mf-btn nmf-war" data-market="WAR"><i class="fa-solid fa-triangle-exclamation"></i> <span>War</span></button>
+                    </div>
+                    <div class="news-body" id="news-container">
+                        <div class="news-item" data-market="GLOBAL">
+                            <span class="news-time mono">12:00 AM</span>
+                            <span class="news-mkt-badge nmb-global" style="background:#555;color:#fff">GLOBAL</span>
+                            <span class="news-text">Global 24-hour simulation started. Waiting for events...</span>
+                        </div>
+                    </div>
+                </div>
+                <!-- Analytics & Fundamentals Panel -->
+                <div class="analytics-container hidden" id="analytics-panel">
+                    <div class="analytics-grid">
+                        <div class="analytics-card">
+                            <h3><i class="fa-solid fa-building"></i> Fundamentals</h3>
+                            <div id="analytics-fundamentals"></div>
+                        </div>
+                        <div class="analytics-card">
+                            <h3><i class="fa-solid fa-gauge-high"></i> Technicals</h3>
+                            <div id="analytics-technicals"></div>
+                        </div>
+                        <div class="analytics-card full-width">
+                            <h3><i class="fa-solid fa-chart-line"></i> Relative Performance vs Index (1 Month)</h3>
+                            <div class="analytics-chart-wrapper">
+                                <canvas id="analytics-chart"></canvas>
+                            </div>
+                        </div>
+                        <div class="analytics-card full-width">
+                            <h3><i class="fa-solid fa-wallet"></i> Portfolio Equity Curve</h3>
+                            <div class="analytics-chart-wrapper">
+                                <canvas id="equity-curve-chart"></canvas>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </main>
+
+            <!-- Order Panel -->
+            <aside class="order-panel">
+                <div class="sec-header">
+                    <span><i class="fa-solid fa-bolt"></i> Order Entry</span>
+                    <span class="badge mono" id="order-symbol">---</span>
+                </div>
+
+                <div class="order-tabs">
+                    <button class="o-tab active" id="tab-equity">Equity</button>
+                    <button class="o-tab" id="tab-options">Options</button>
+                    <button class="o-tab" id="tab-bot" style="color: var(--accent);"><i class="fa-solid fa-robot"></i> Algo Bot</button>
+                </div>
+
+                <!-- Equity Form -->
+                <div class="order-form" id="equity-form">
+                    <div class="fg">
+                        <label for="order-product">Product</label>
+                        <select class="fc" id="order-product" disabled aria-describedby="order-product-note"><option>CNC (Delivery)</option></select>
+                        <div class="field-note" id="order-product-note">Positions carry forward overnight.</div>
+                    </div>
+                    <div class="fg">
+                        <label for="order-type">Order Type</label>
+                        <select class="fc" id="order-type">
+                            <option value="MARKET">MARKET</option>
+                            <option value="LIMIT">LIMIT</option>
+                            <option value="STOP">STOP</option>
+                        </select>
+                        <div class="field-note" id="order-type-note">MARKET at LTP; LIMIT guarantees price; STOP triggers when price crosses target.</div>
+                    </div>
+                    <div class="fg">
+                        <label for="order-tif">Time In Force</label>
+                        <select class="fc" id="order-tif">
+                            <option value="DAY">DAY (Pending till EOD)</option>
+                            <option value="IOC">IOC (Immediate or Cancel)</option>
+                            <option value="FOK">FOK (Fill or Kill)</option>
+                        </select>
+                    </div>
+                    <div class="fg hidden" id="limit-price-group">
+                        <label for="order-limit-price">Limit Price</label>
+                        <input type="number" id="order-limit-price" class="fc mono" placeholder="0.00" step="0.05" min="0">
+                    </div>
+                    <div class="fg">
+                        <label for="order-qty">Quantity</label>
+                        <input type="number" id="order-qty" class="fc mono qty-big" value="1" min="1">
+                        <div class="presets">
+                            <button class="preset" data-v="1">+1</button>
+                            <button class="preset" data-v="10">+10</button>
+                            <button class="preset" data-v="50">+50</button>
+                            <button class="preset" data-v="100">+100</button>
+                        </div>
+                    </div>
+                    <div class="order-meta">
+                        <span>Req Margin</span><span class="mono" id="req-margin">₹ 0.00</span>
+                    </div>
+                    <div class="sl-target-row">
+                        <div class="sl-field">
+                            <label for="sl-price">Stop Loss</label>
+                            <input type="number" id="sl-price" class="fc mono" placeholder="0.00" step="0.05" min="0">
+                            <div class="presets sl-presets" style="margin-top: 5px;">
+                                <button class="preset sl-pct-btn" data-pct="1">-1%</button>
+                                <button class="preset sl-pct-btn" data-pct="2">-2%</button>
+                                <button class="preset sl-pct-btn" data-pct="5">-5%</button>
+                            </div>
+                            <div style="margin-top: 8px; font-size: 12px; display:flex; align-items:center; gap:5px; color:var(--text-dim);">
+                                <input type="checkbox" id="tsl-check" style="accent-color:var(--accent);"> <label for="tsl-check" style="margin:0; cursor:pointer;">Trailing Stop Loss</label>
+                            </div>
+                        </div>
+                        <div class="sl-field">
+                            <label for="target-price">Target</label>
+                            <input type="number" id="target-price" class="fc mono" placeholder="0.00" step="0.05" min="0">
+                            <div class="presets tp-presets" style="margin-top: 5px;">
+                                <button class="preset tp-pct-btn" data-pct="2">+2%</button>
+                                <button class="preset tp-pct-btn" data-pct="5">+5%</button>
+                                <button class="preset tp-pct-btn" data-pct="10">+10%</button>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="sl-hint"><i class="fa-solid fa-bell"></i> Auto square-off when SL/Target hit</div>
+                    
+                    <div class="order-actions">
+                        <button class="uiverse-btn btn-buy" id="btn-buy">
+                            <div class="button-inner">
+                                <span><i class="fa-solid fa-arrow-up"></i> BUY</span>
+                            </div>
+                        </button>
+                        <button class="uiverse-btn btn-sell" id="btn-sell">
+                            <div class="button-inner">
+                                <span><i class="fa-solid fa-arrow-down"></i> SELL / SHORT</span>
+                            </div>
+                        </button>
+                    </div>
+
+                    <!-- Market Depth (L2) -->
+                    <div class="l2-depth">
+                        <div class="l2-header">Market Depth</div>
+                        <div class="l2-table">
+                            <div class="l2-col">
+                                <div class="l2-row-head"><span>Bid Price</span><span>Qty</span></div>
+                                <div id="l2-bids"></div>
+                            </div>
+                            <div class="l2-col">
+                                <div class="l2-row-head"><span>Ask Price</span><span>Qty</span></div>
+                                <div id="l2-asks"></div>
+                            </div>
+                        </div>
+                        <div class="l2-ratio-bar">
+                            <div class="l2-ratio-bid" id="l2-ratio-bid" style="width: 50%"></div>
+                            <div class="l2-ratio-ask" id="l2-ratio-ask" style="width: 50%"></div>
+                        </div>
+                        <div class="l2-ratio-labels">
+                            <span id="l2-bid-pct">50%</span>
+                            <span id="l2-ask-pct">50%</span>
+                        </div>
+                    </div>
+
+                    <div class="short-info">
+                        <i class="fa-solid fa-info-circle"></i> Sell without holdings = Short position. Cover later by buying back.
+                    </div>
+                </div>
+
+                <!-- Options Form -->
+                <div class="order-form hidden" id="options-form" style="display:flex; flex-direction:column; justify-content:center; align-items:center; padding:30px 10px; text-align:center;">
+                    <i class="fa-solid fa-link" style="font-size:36px; color:var(--accent); margin-bottom:15px;"></i>
+                    <h3 style="margin:0 0 10px 0;">Realistic Options</h3>
+                    <p style="font-size:12px; color:var(--text-dim); margin-bottom:20px;">View the full option chain with Bid/Ask spreads and Greeks to execute advanced option strategies.</p>
+                    <button id="evt-bind-31" class="btn" style="width:100%; padding:12px; font-weight:bold; letter-spacing:1px; background:var(--accent); color:#000; border-radius:4px; cursor:pointer; border:none;" >Open Option Chain</button>
+                </div>
+
+                <!-- Algo Bot Form -->
+                <div class="order-form hidden" id="bot-form">
+                    <div style="display: flex; gap: 10px;">
+                        <div class="fg" style="flex:1;">
+                            <label for="bot-direction">Direction</label>
+                            <select class="fc" id="bot-direction">
+                                <option value="LONG_SHORT">Long & Short</option>
+                                <option value="LONG_ONLY">Long Only</option>
+                                <option value="SHORT_ONLY">Short Only</option>
+                            </select>
+                        </div>
+                        <div class="fg" style="flex:1;">
+                            <label for="bot-asset">Asset</label>
+                            <select class="fc" id="bot-asset">
+                                <option value="EQUITY">Equity</option>
+                                <option value="OPTIONS">Options (ATM)</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="fg">
+                        <div style="display:flex; justify-content:space-between; align-items:baseline;">
+                            <label for="bot-strategy">Strategy Engine</label>
+                            <a id="evt-bind-32" href="#"  style="color:var(--accent); text-decoration:none; font-size:11px; font-weight:bold;">+ Custom Studio</a>
+                        </div>
+                        <select class="fc" id="bot-strategy">
+                            <option value="CONFLUENCE">Confluence (RSI + MACD)</option>
+                            <option value="MOMENTUM">Momentum Noise (Random High Freq)</option>
+                            <option value="RSI_REVERSION">RSI Mean Reversion (Range Bound)</option>
+                            <option value="TREND_FOLLOWER">Trend Follower (Moving Average Crossover)</option>
+                            <option value="BOLLINGER_REVERSION">Bollinger Mean Reversion</option>
+                            <option value="EMA_CROSSOVER">EMA Fast/Slow Crossover</option>
+                            <option value="MACD_MOMENTUM">Pure MACD Momentum</option>
+                            <option value="HFT_SCALPER">HFT Micro Scalper (Tick Momentum)</option>
+                            <option value="HFT_STAT_ARB">HFT Stat-Arb (Micro Z-Score Reversion)</option>
+                            <option value="HFT_VOLATILITY">HFT Volatility Breakout (Micro Channel)</option>
+                        </select>
+                        <div class="field-note">Confluence: Bearish cross triggers SHORT.</div>
+                    </div>
+                    <div class="fg">
+                        <label>Risk Per Trade (Position Sizing)</label>
+                        <div style="display:flex; align-items:center; gap: 10px; margin-top:5px;">
+                            <input type="range" id="bot-risk-slider" min="1" max="50" value="10" style="flex:1;">
+                            <span class="mono" id="bot-risk-val" style="font-weight:600; color:var(--accent);">10%</span>
+                        </div>
+                        <div class="field-note">Percentage of total portfolio cash to risk.</div>
+                    </div>
+                    <div class="fg">
+                        <div style="display: flex; justify-content: space-between; align-items: center;">
+                            <label>Risk Management Engine</label>
+                            <label style="display: flex; align-items: center; gap: 5px; font-size: 11px; cursor: pointer;">
+                                <input type="checkbox" id="bot-trailing-stop" checked> Trailing Stop
+                            </label>
+                        </div>
+                        <div style="display:flex; gap:10px; margin-top:5px;">
+                            <div class="btn-group" style="flex:1; padding:10px; font-weight:600; font-size:12px; display: flex; align-items: center; justify-content: space-between;">
+                                Stop Loss: 
+                                <div style="display: flex; align-items: center; gap: 2px;">
+                                -<input type="number" id="bot-sl-pct" value="1" min="0.1" max="20" step="0.1" style="width: 40px; background: transparent; border: 1px solid var(--border); color: var(--text); border-radius: 4px; padding: 2px 4px; font-family: monospace; font-size: 12px; text-align: center;">%
+                                </div>
+                            </div>
+                            <div class="btn-group" style="flex:1; padding:10px; font-weight:600; font-size:12px; display: flex; align-items: center; justify-content: space-between;">
+                                Take Profit: 
+                                <div style="display: flex; align-items: center; gap: 2px;">
+                                +<input type="number" id="bot-tp-pct" value="2" min="0.1" max="100" step="0.1" style="width: 40px; background: transparent; border: 1px solid var(--border); color: var(--text); border-radius: 4px; padding: 2px 4px; font-family: monospace; font-size: 12px; text-align: center;">%
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="bot-status" style="margin-top: 15px; padding: 12px; border-radius: var(--radius); background: var(--glass-bg); border: 1px solid var(--glass-border); text-align: center;">
+                        <div style="font-size: 11px; color: var(--text-dim); text-transform: uppercase; letter-spacing: 1px;">Engine Status</div>
+                        <div id="bot-state-display" style="font-size: 18px; font-weight: 700; color: var(--text-dim); margin-top: 4px; font-family: var(--mono);">OFFLINE</div>
+                    </div>
+
+                    <div class="order-actions" style="margin-top: 15px;">
+                        <button class="btn-buy uiverse-btn" id="btn-toggle-bot" style="width: 100%; --accent: var(--accent);">
+                            <div class="button-outer" style="border-radius: var(--radius);">
+                                <div class="button-inner" style="border-radius: calc(var(--radius) - 2px);">
+                                    <span id="bot-btn-text"><i class="fa-solid fa-power-off"></i> START ENGINE</span>
+                                </div>
+                            </div>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Position Card -->
+                <div class="pos-card">
+                    <div class="pos-card-head">Current Position</div>
+                    <div class="pos-card-grid">
+                        <div class="pc-item"><span class="pc-label">Qty</span><span class="pc-val mono" id="pos-qty">0</span></div>
+                        <div class="pc-item"><span class="pc-label">Avg</span><span class="pc-val mono" id="pos-avg">0.00</span></div>
+                        <div class="pc-item"><span class="pc-label">LTP</span><span class="pc-val mono" id="pos-ltp">0.00</span></div>
+                        <div class="pc-item pc-pnl"><span class="pc-label">P&L</span><span class="pc-val mono" id="pos-pnl">₹ 0.00</span></div>
+                    </div>
+                </div>
+            </aside>
+        </div>
+
+        <!-- Bottom Table -->
+        <footer class="bottom-bar">
+            <div class="bottom-tabs">
+                <button class="b-tab active" id="positions-tab"><i class="fa-solid fa-chart-pie"></i> Positions</button>
+                <button class="b-tab" id="options-pos-tab"><i class="fa-solid fa-layer-group"></i> Options</button>
+                <button class="b-tab" id="pending-orders-tab"><i class="fa-solid fa-hourglass-half"></i> Pending <span class="badge mono" id="pending-count" style="padding:1px 5px;font-size:9px;background:var(--orange)">0</span></button>
+                <button class="b-tab" id="history-tab"><i class="fa-solid fa-clock-rotate-left"></i> Trade History</button>
+                <button class="b-tab export-csv-btn" id="btn-export-csv" title="Export Premium Trade Statement"><i class="fa-solid fa-file-invoice-dollar"></i> Export Statement</button>
+                <button class="b-tab close-all-btn" id="btn-close-all" title="Close all open positions"><i class="fa-solid fa-xmark"></i> Close All</button>
+                <button class="b-tab" id="bot-stats-tab" style="color: var(--accent);"><i class="fa-solid fa-robot"></i> Bot Stats</button>
+            </div>
+            <div class="table-area" id="equity-table">
+                <table class="dtable">
+                    <thead><tr>
+                        <th>Symbol</th><th>Side</th><th>Product</th>
+                        <th class="r">Qty</th><th class="r">Avg Price</th><th class="r">LTP</th>
+                        <th class="r">Value</th><th class="r">P&amp;L</th><th class="r">P&amp;L%</th><th class="r">Action</th>
+                    </tr></thead>
+                    <tbody id="positions-tbody">
+                        <tr><td colspan="10" class="empty">No open positions</td></tr>
+                    </tbody>
+                </table>
+            </div>
+            <div class="table-area hidden" id="options-table">
+                <table class="dtable">
+                    <thead><tr>
+                        <th>Symbol</th><th>Type</th><th>Strike</th><th>Expiry</th>
+                        <th class="r">Lots</th><th class="r">Qty</th><th class="r">Avg Prem</th>
+                        <th class="r">LTP</th><th class="r">P&amp;L</th><th class="r">Action</th>
+                    </tr></thead>
+                    <tbody id="options-tbody">
+                        <tr><td colspan="10" class="empty">No option positions</td></tr>
+                    </tbody>
+                </table>
+            </div>
+            <div class="table-area hidden" id="pending-table">
+                <table class="dtable">
+                    <thead><tr>
+                        <th>Time</th><th>Day</th><th>Symbol</th><th>Side</th><th>Type</th>
+                        <th class="r">Qty</th><th class="r">Limit Price</th><th class="r">LTP</th><th class="r">Action</th>
+                    </tr></thead>
+                    <tbody id="pending-tbody">
+                        <tr><td colspan="9" class="empty">No pending orders</td></tr>
+                    </tbody>
+                </table>
+            </div>
+            <div class="table-area hidden" id="history-table">
+                <table class="dtable">
+                    <thead><tr>
+                        <th>Time</th><th>Day</th><th>Symbol</th><th>Side</th><th>Type</th>
+                        <th class="r">Qty</th><th class="r">Price</th><th class="r">Value</th>
+                    </tr></thead>
+                    <tbody id="history-tbody">
+                        <tr><td colspan="8" class="empty">No trades yet</td></tr>
+                    </tbody>
+                </table>
+            </div>
+            <div class="table-area hidden" id="bot-stats-table">
+                <table class="dtable">
+                    <thead><tr>
+                        <th>Symbol</th><th>Asset</th><th>State</th>
+                        <th class="r">Qty</th><th class="r">Entry</th><th class="r">SL</th><th class="r">LTP</th>
+                        <th class="r">P&amp;L</th><th class="r">Action</th>
+                    </tr></thead>
+                    <tbody id="bot-stats-tbody">
+                        <tr><td colspan="9" class="empty">No active bots running</td></tr>
+                    </tbody>
+                </table>
+            </div>
+        </footer>
+        </div>

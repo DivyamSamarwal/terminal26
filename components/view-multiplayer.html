@@ -1,0 +1,73 @@
+<div id="view-multiplayer" class="hidden">
+    <div class="bank-container" style="max-width: 600px; margin: 40px auto;">
+        <div class="sec-header" style="border-bottom:none; margin-bottom:10px; font-size:16px;">
+            <div>
+                <button id="btn-close-multiplayer" class="btn-sm" style="margin-right:10px; background:var(--bg-2); border:1px solid var(--border); color:var(--text); padding:4px 10px; border-radius:4px; cursor:pointer;" ><i class="fa-solid fa-arrow-left"></i> Back</button>
+                <span><i class="fa-solid fa-users accent"></i> Multiplayer Session</span>
+                <span class="badge mono" style="font-size:10px; background-color: var(--accent); color: #000;">P2P WEBRTC</span>
+            </div>
+        </div>
+        
+        <div class="bank-grid" style="grid-template-columns: 1fr;">
+            <!-- Connection Status -->
+            <div class="bank-card" id="mp-status-card" style="text-align: center; display: none;">
+                <div class="sec-header" style="margin: -20px -20px 20px -20px; padding: 0 20px; background: rgba(0,0,0,0.2); justify-content: center;">
+                    <span><i class="fa-solid fa-signal"></i> Active Connection</span>
+                </div>
+                <h3 id="mp-status-text" style="color: var(--green); margin-bottom: 10px;">Connected</h3>
+                <div id="mp-role-text" style="color: var(--text-dim); margin-bottom: 20px;">Role: Host</div>
+                <p id="mp-room-code-display" class="mono" style="font-size: 24px; letter-spacing: 2px; padding: 15px; background: var(--bg-0); border-radius: 8px; border: 1px dashed var(--border); margin-bottom: 20px;">----</p>
+                <div id="mp-clients-list" style="margin-bottom: 20px; text-align: left; max-height: 150px; overflow-y: auto; background: var(--bg-0); padding: 10px; border-radius: 8px;">
+                    <div style="color: var(--text-dim); font-size: 12px; margin-bottom: 5px;">Connected Peers:</div>
+                    <ul id="mp-peers-ul" style="list-style: none; padding: 0; margin: 0; font-family: var(--mono); font-size: 13px;">
+                    </ul>
+                </div>
+                <button class="btn-buy uiverse-btn" id="btn-mp-disconnect" style="width:100%; filter: hue-rotate(150deg);">
+                    <div class="button-outer">
+                        <div class="button-inner">
+                            <span><i class="fa-solid fa-plug-circle-xmark"></i> Disconnect</span>
+                        </div>
+                    </div>
+                </button>
+            </div>
+
+            <!-- Host Game -->
+            <div class="bank-card" id="mp-host-card">
+                <div class="sec-header" style="margin: -20px -20px 20px -20px; padding: 0 20px; background: rgba(0,0,0,0.2);">
+                    <span><i class="fa-solid fa-server"></i> Host a Market</span>
+                </div>
+                <p style="color: var(--text-dim); font-size: 13px; margin-bottom: 20px; line-height: 1.5;">
+                    Create a P2P market instance. You will control the tick generation, simulation speed, and macro news. Other players can join your room and trade on your order book.
+                </p>
+                <button class="btn-buy uiverse-btn" id="btn-mp-host" style="margin-top:auto;width:100%;">
+                    <div class="button-outer">
+                        <div class="button-inner">
+                            <span><i class="fa-solid fa-tower-broadcast"></i> Initialize Host Server</span>
+                        </div>
+                    </div>
+                </button>
+            </div>
+
+            <!-- Join Game -->
+            <div class="bank-card" id="mp-join-card">
+                <div class="sec-header" style="margin: -20px -20px 20px -20px; padding: 0 20px; background: rgba(0,0,0,0.2);">
+                    <span><i class="fa-solid fa-right-to-bracket"></i> Join a Market</span>
+                </div>
+                <p style="color: var(--text-dim); font-size: 13px; margin-bottom: 20px; line-height: 1.5;">
+                    Enter a Room Code to connect to another player's market. Your local simulation clock will be disabled and synced to the host.
+                </p>
+                <div class="fg">
+                    <label>Room Code</label>
+                    <input type="text" id="mp-join-code" class="fc mono" placeholder="e.g. DALAL-A1B2" style="text-transform: uppercase; font-size: 16px; letter-spacing: 2px;">
+                </div>
+                <button class="btn-buy uiverse-btn" id="btn-mp-join" style="margin-top:auto;width:100%; filter: hue-rotate(280deg);">
+                    <div class="button-outer">
+                        <div class="button-inner">
+                            <span><i class="fa-solid fa-link"></i> Connect to Host</span>
+                        </div>
+                    </div>
+                </button>
+            </div>
+        </div>
+    </div>
+</div>

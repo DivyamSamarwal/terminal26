@@ -1,0 +1,62 @@
+<div id="option-chain-modal" class="overlay hidden">
+        <div class="overlay-card" style="width: 1100px; max-width: 95vw; max-height: 90vh; display:flex; flex-direction:column; padding:0; background:var(--bg-0);">
+            <div class="modal-header" style="display:flex; justify-content:space-between; align-items:center; border-bottom:1px solid var(--border); padding:15px 20px; background:var(--bg-1);">
+                <div style="display:flex; align-items:center; gap:15px;">
+                    <h2 style="margin:0; font-size:18px;">Option Chain: <span id="oc-ticker" style="color:var(--accent);"></span></h2>
+                    <select id="expiry-date" style="padding:6px 12px; font-size:13px; background-color:var(--bg-1); color:var(--text-bright); border:1px solid var(--border); border-radius:4px; outline:none; cursor:pointer; min-width: 150px; font-weight: 600;"></select>
+                </div>
+                <div style="display:flex; align-items:center; gap:15px;">
+                    <div class="fg" style="margin:0; display:flex; align-items:center; gap:10px;">
+                        <label for="opt-strategy" style="margin:0; color:var(--text-dim); font-size:12px; font-weight:bold; text-transform:uppercase; letter-spacing:1px;">Strategy</label>
+                        <select id="opt-strategy" style="padding:6px; font-size:13px; font-weight:bold; background-color:var(--bg-1); color:var(--text-bright); border:1px solid var(--border); border-radius:4px; outline:none; cursor:pointer;" >
+                            <option value="">-- Builder --</option>
+                            <option value="STRADDLE">Straddle (ATM)</option>
+                            <option value="BULL_CALL">Bull Call Spread</option>
+                            <option value="BEAR_PUT">Bear Put Spread</option>
+                        </select>
+                        <label for="option-lots" style="margin:0; margin-left:10px; color:var(--text-dim); font-size:12px; font-weight:bold; text-transform:uppercase; letter-spacing:1px;">Lots</label>
+                        <input type="number" id="option-lots" value="1" min="1" style="width:80px; padding:6px; font-size:16px; font-weight:bold; background-color:var(--bg-1); color:var(--text-bright); border:1px solid var(--border); border-radius:4px; outline:none; text-align:center;">
+                    </div>
+                    <button id="evt-bind-47" class="btn-close-modal"  style="background:transparent; border:none; color:var(--text-dim); font-size:18px; cursor:pointer;">&#x2715;</button>
+                </div>
+            </div>
+            
+            <div style="flex:1; overflow-y:auto; padding:0; position:relative;">
+                <table class="oc-table" style="width:100%; border-collapse:collapse; text-align:center; font-size:12px; font-family:'Roboto Mono', monospace;">
+                    <thead style="position:sticky; top:0; z-index:10;">
+                        <tr>
+                            <th colspan="4" style="background:var(--bg-1); padding:8px; border-bottom:1px solid var(--border); border-right:1px solid var(--border); color:#00e676;">CALLS (CE)</th>
+                            <th style="background:var(--bg-0); padding:8px; border-bottom:1px solid var(--border);"></th>
+                            <th colspan="4" style="background:var(--bg-1); padding:8px; border-bottom:1px solid var(--border); border-left:1px solid var(--border); color:#ff1744;">PUTS (PE)</th>
+                        </tr>
+                        <tr style="color:var(--text-dim); font-size:11px; background:var(--bg-1);">
+                            <th style="padding:8px; border-bottom:1px solid var(--border);">IV / &Theta;</th>
+                            <th style="padding:8px; border-bottom:1px solid var(--border);">&Delta;</th>
+                            <th style="padding:8px; border-bottom:1px solid var(--border);">Bid (Sell)</th>
+                            <th style="padding:8px; border-bottom:1px solid var(--border); border-right:1px solid var(--border);">Ask (Buy)</th>
+                            <th style="padding:8px; border-bottom:1px solid var(--border); font-weight:bold; color:var(--text); font-family:var(--font);">STRIKE</th>
+                            <th style="padding:8px; border-bottom:1px solid var(--border); border-left:1px solid var(--border);">Bid (Sell)</th>
+                            <th style="padding:8px; border-bottom:1px solid var(--border);">Ask (Buy)</th>
+                            <th style="padding:8px; border-bottom:1px solid var(--border);">&Delta;</th>
+                            <th style="padding:8px; border-bottom:1px solid var(--border);">IV / &Theta;</th>
+                        </tr>
+                    </thead>
+                    <tbody id="oc-tbody">
+                        <!-- Rendered by JS -->
+                    </tbody>
+                </table>
+            </div>
+            
+            <div class="modal-footer" style="padding:15px 20px; border-top:1px solid var(--border); background:var(--bg-1); display:flex; justify-content:space-between; align-items:center;">
+                <div style="font-size:12px; color:var(--text-dim);">
+                    <span>Lot Size: <b id="lot-size" class="mono" style="color:var(--text);">0</b></span> |
+                    <span>Total Qty: <b id="total-qty" class="mono" style="color:var(--text);">0</b></span> |
+                    <span>Underlying LTP: <b id="oc-ltp" class="mono" style="color:var(--text);">0</b></span> |
+                    <span id="oc-preview" style="color:var(--accent); margin-left: 10px;">Hover price to preview</span>
+                </div>
+                <div style="font-size:12px;">
+                    <i class="fa-solid fa-info-circle"></i> Click Bid to Short (Sell to Open), Click Ask to Buy. SPAN Margin blocked for shorts.
+                </div>
+            </div>
+        </div>
+    </div>

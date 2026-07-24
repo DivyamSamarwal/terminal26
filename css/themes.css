@@ -1,0 +1,410 @@
+/* =========================================================
+   DEDICATED THEMES & BACKGROUND PATTERNS
+   ========================================================= */
+
+/* --- 1. THEMES --- */
+
+/* 1. Carbon (Default) */
+body.theme-carbon {
+    --bg-0: #050505;
+    --bg-1: #0F0F13;
+    --bg-2: #16161A;
+    --bg-3: #1C1C22;
+    --border: rgba(255, 255, 255, 0.08);
+    --border-light: rgba(255, 255, 255, 0.15);
+    --text: #A0A5B5;
+    --text-dim: #656A7A;
+    --text-bright: #FFFFFF;
+    --glass-bg: rgba(15, 15, 19, 0.65);
+    --glass-border: rgba(255, 255, 255, 0.06);
+    --shadow: 0 12px 40px rgba(0, 0, 0, 0.6);
+}
+
+/* 2. Midnight */
+body.theme-midnight {
+    --bg-0: #01030B;
+    --bg-1: #0A1121;
+    --bg-2: #10192D;
+    --bg-3: #16223B;
+    --border: rgba(140, 180, 255, 0.12);
+    --border-light: rgba(140, 180, 255, 0.25);
+    --text: #8FA6D3;
+    --text-dim: #546C9E;
+    --text-bright: #E2EBFF;
+    --glass-bg: rgba(10, 17, 33, 0.7);
+    --glass-border: rgba(140, 180, 255, 0.1);
+    --shadow: 0 12px 40px rgba(0, 0, 0, 0.7);
+}
+
+/* 3. Slate */
+body.theme-slate {
+    --bg-0: #14171A;
+    --bg-1: #1E2226;
+    --bg-2: #282C33;
+    --bg-3: #323740;
+    --border: rgba(255, 255, 255, 0.06);
+    --border-light: rgba(255, 255, 255, 0.12);
+    --text: #969EA8;
+    --text-dim: #606873;
+    --text-bright: #E1E6EB;
+    --glass-bg: rgba(30, 34, 38, 0.75);
+    --glass-border: rgba(255, 255, 255, 0.05);
+    --shadow: 0 10px 30px rgba(0, 0, 0, 0.4);
+}
+
+/* 4. Apex (High Contrast Stark) */
+body.theme-apex {
+    --bg-0: #000000;
+    --bg-1: #080808;
+    --bg-2: #111111;
+    --bg-3: #1A1A1A;
+    --border: #333333;
+    --border-light: #555555;
+    --text: #CCCCCC;
+    --text-dim: #666666;
+    --text-bright: #FFFFFF;
+    --glass-bg: rgba(8, 8, 8, 0.9);
+    --glass-border: #333333;
+    --shadow: 0 0 0 rgba(0,0,0,0);
+    --radius: 4px;
+}
+
+/* 5. Arctic */
+body.theme-arctic {
+    --bg-0: #060E18;
+    --bg-1: #0F1D2B;
+    --bg-2: #172A3C;
+    --bg-3: #213A51;
+    --border: rgba(100, 220, 255, 0.15);
+    --border-light: rgba(100, 220, 255, 0.3);
+    --text: #A6D0E8;
+    --text-dim: #6696B5;
+    --text-bright: #E6F5FF;
+    --glass-bg: rgba(15, 29, 43, 0.6);
+    --glass-border: rgba(100, 220, 255, 0.1);
+    --shadow: 0 12px 35px rgba(0, 20, 40, 0.8);
+}
+
+/* 6. Deep Sea */
+body.theme-deepsea {
+    --bg-0: linear-gradient(180deg, #02111A 0%, #010A10 100%);
+    --bg-1: #041D29;
+    --bg-2: #08293B;
+    --bg-3: #0C374D;
+    --border: rgba(0, 255, 220, 0.15);
+    --border-light: rgba(0, 255, 220, 0.3);
+    --text: #8AD1CB;
+    --text-dim: #4B918B;
+    --text-bright: #D0FFFA;
+    --glass-bg: rgba(4, 29, 41, 0.7);
+    --glass-border: rgba(0, 255, 220, 0.1);
+    --shadow: 0 15px 45px rgba(0, 15, 25, 0.8);
+}
+
+/* 7. Eclipse */
+body.theme-eclipse {
+    --bg-0: #000000;
+    --bg-1: #050505;
+    --bg-2: #0C0C0C;
+    --bg-3: #141414;
+    --border: rgba(255, 0, 255, 0.2);
+    --border-light: rgba(255, 0, 255, 0.4);
+    --text: #C4A1D9;
+    --text-dim: #7D5696;
+    --text-bright: #F5E6FF;
+    --glass-bg: rgba(5, 5, 5, 0.8);
+    --glass-border: rgba(255, 0, 255, 0.15);
+    --shadow: 0 0 30px rgba(120, 0, 120, 0.15);
+}
+
+/* 8. Ember */
+body.theme-ember {
+    --bg-0: #120502;
+    --bg-1: #1E0A04;
+    --bg-2: #2E1208;
+    --bg-3: #401B0C;
+    --border: rgba(255, 100, 50, 0.12);
+    --border-light: rgba(255, 100, 50, 0.25);
+    --text: #C9A091;
+    --text-dim: #8F5B46;
+    --text-bright: #FFE5DB;
+    --glass-bg: rgba(30, 10, 4, 0.75);
+    --glass-border: rgba(255, 100, 50, 0.1);
+    --shadow: 0 10px 40px rgba(0, 0, 0, 0.8);
+}
+
+/* 9. Forest */
+body.theme-forest {
+    --bg-0: #030F07;
+    --bg-1: #081C0F;
+    --bg-2: #0E2B18;
+    --bg-3: #153D23;
+    --border: rgba(100, 255, 150, 0.1);
+    --border-light: rgba(100, 255, 150, 0.2);
+    --text: #9BBAA5;
+    --text-dim: #578065;
+    --text-bright: #DDF5E4;
+    --glass-bg: rgba(8, 28, 15, 0.75);
+    --glass-border: rgba(100, 255, 150, 0.08);
+    --shadow: 0 12px 35px rgba(0, 0, 0, 0.6);
+}
+
+/* 10. Indigo */
+body.theme-indigo {
+    --bg-0: #060411;
+    --bg-1: #0F0A26;
+    --bg-2: #18113A;
+    --bg-3: #221950;
+    --border: rgba(160, 140, 255, 0.12);
+    --border-light: rgba(160, 140, 255, 0.25);
+    --text: #A69DCC;
+    --text-dim: #655996;
+    --text-bright: #E7E3FF;
+    --glass-bg: rgba(15, 10, 38, 0.7);
+    --glass-border: rgba(160, 140, 255, 0.1);
+    --shadow: 0 15px 40px rgba(5, 0, 20, 0.8);
+}
+
+/* 11. Mono */
+body.theme-mono {
+    --bg-0: #111111;
+    --bg-1: #181818;
+    --bg-2: #222222;
+    --bg-3: #2C2C2C;
+    --border: #444444;
+    --border-light: #666666;
+    --text: #BBBBBB;
+    --text-dim: #777777;
+    --text-bright: #FFFFFF;
+    --glass-bg: rgba(24, 24, 24, 0.8);
+    --glass-border: #444444;
+    --shadow: 0 8px 30px rgba(0,0,0,0.5);
+    --radius: 0px;
+}
+
+/* 12. Nova */
+body.theme-nova {
+    --bg-0: linear-gradient(135deg, #180530 0%, #0C011F 100%);
+    --bg-1: #250B47;
+    --bg-2: #34125E;
+    --bg-3: #461C78;
+    --border: rgba(220, 100, 255, 0.2);
+    --border-light: rgba(220, 100, 255, 0.4);
+    --text: #D2A8FA;
+    --text-dim: #9059C7;
+    --text-bright: #F5E6FF;
+    --glass-bg: rgba(37, 11, 71, 0.7);
+    --glass-border: rgba(220, 100, 255, 0.15);
+    --shadow: 0 0 25px rgba(80, 0, 120, 0.5);
+}
+
+/* 13. Plum */
+body.theme-plum {
+    --bg-0: #120A16;
+    --bg-1: #1D1322;
+    --bg-2: #2B1D33;
+    --bg-3: #392844;
+    --border: rgba(200, 150, 220, 0.1);
+    --border-light: rgba(200, 150, 220, 0.2);
+    --text: #B4A0BD;
+    --text-dim: #755B82;
+    --text-bright: #EBE0F0;
+    --glass-bg: rgba(29, 19, 34, 0.75);
+    --glass-border: rgba(200, 150, 220, 0.08);
+    --shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+}
+
+/* 14. Rose */
+body.theme-rose {
+    --bg-0: #140A0C;
+    --bg-1: #211216;
+    --bg-2: #301D22;
+    --bg-3: #422930;
+    --border: rgba(255, 140, 160, 0.12);
+    --border-light: rgba(255, 140, 160, 0.25);
+    --text: #C49BA2;
+    --text-dim: #85575F;
+    --text-bright: #FFEBEE;
+    --glass-bg: rgba(33, 18, 22, 0.75);
+    --glass-border: rgba(255, 140, 160, 0.1);
+    --shadow: 0 12px 35px rgba(0, 0, 0, 0.5);
+}
+
+/* 15. Sand */
+body.theme-sand {
+    --bg-0: #14120D;
+    --bg-1: #211E16;
+    --bg-2: #302C21;
+    --bg-3: #403A2E;
+    --border: rgba(220, 200, 150, 0.12);
+    --border-light: rgba(220, 200, 150, 0.25);
+    --text: #B8B09F;
+    --text-dim: #80765F;
+    --text-bright: #F2ECDD;
+    --glass-bg: rgba(33, 30, 22, 0.8);
+    --glass-border: rgba(220, 200, 150, 0.1);
+    --shadow: 0 10px 30px rgba(0, 0, 0, 0.6);
+}
+
+/* 16. Singularity */
+body.theme-singularity {
+    --bg-0: #000000;
+    --bg-1: #020202;
+    --bg-2: #050505;
+    --bg-3: #080808;
+    --border: rgba(255, 255, 255, 0.05);
+    --border-light: rgba(255, 255, 255, 0.1);
+    --text: #777777;
+    --text-dim: #444444;
+    --text-bright: #AAAAAA;
+    --glass-bg: rgba(0, 0, 0, 0.95);
+    --glass-border: rgba(255, 255, 255, 0.03);
+    --shadow: 0 0 0 transparent;
+}
+
+/* 17. Vaporwave */
+body.theme-vaporwave {
+    --bg-0: linear-gradient(180deg, #0A0A1C 0%, #1A0B2E 100%);
+    --bg-1: #1B1238;
+    --bg-2: #2A1C52;
+    --bg-3: #39276E;
+    --border: #00F0FF;
+    --border-light: #FF007F;
+    --text: #CDE2FF;
+    --text-dim: #9D74D2;
+    --text-bright: #FFFFFF;
+    --glass-bg: rgba(27, 18, 56, 0.7);
+    --glass-border: rgba(0, 240, 255, 0.3);
+    --shadow: 0 0 20px rgba(255, 0, 127, 0.2);
+    --radius: 0px;
+}
+
+
+/* --- 2. BACKGROUND PATTERNS --- */
+
+body::before {
+    content: '';
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 0;
+    pointer-events: none;
+    opacity: 0;
+    transition: opacity 0.3s ease;
+}
+
+/* Ensure the main app content sits above the background pattern */
+.app {
+    position: relative;
+    z-index: 1;
+}
+
+body[class*="bg-"]::before {
+    opacity: 1;
+}
+
+/* 1. Brick */
+body.bg-brick::before {
+    background-image: 
+      linear-gradient(335deg, rgba(255,255,255,0.02) 23px, transparent 23px),
+      linear-gradient(155deg, rgba(255,255,255,0.02) 23px, transparent 23px),
+      linear-gradient(335deg, rgba(255,255,255,0.02) 23px, transparent 23px),
+      linear-gradient(155deg, rgba(255,255,255,0.02) 23px, transparent 23px);
+    background-size: 58px 58px;
+    background-position: 0px 2px, 4px 35px, 29px 31px, 34px 6px;
+}
+
+/* 2. Eclipse */
+body.bg-eclipse::before {
+    background-image: radial-gradient(circle at center, rgba(255,255,255,0.08) 0%, transparent 60%);
+}
+
+/* 3. Fire */
+body.bg-fire::before {
+    background-image: radial-gradient(ellipse at bottom, rgba(255,80,0,0.05) 0%, transparent 50%);
+}
+
+/* 4. Impact */
+body.bg-impact::before {
+    background: repeating-linear-gradient(
+      -45deg,
+      rgba(255,255,255,0.03),
+      rgba(255,255,255,0.03) 2px,
+      transparent 2px,
+      transparent 12px
+    );
+}
+
+/* 5. Lines */
+body.bg-lines::before {
+    background: repeating-linear-gradient(
+      0deg,
+      rgba(255,255,255,0.02),
+      rgba(255,255,255,0.02) 1px,
+      transparent 1px,
+      transparent 4px
+    );
+}
+
+/* 6. Lines 2 */
+body.bg-lines2::before {
+    background: repeating-linear-gradient(
+      90deg,
+      rgba(255,255,255,0.02),
+      rgba(255,255,255,0.02) 1px,
+      transparent 1px,
+      transparent 20px
+    );
+}
+
+
+/* 8. Studded */
+body.bg-studded::before {
+    background-image: radial-gradient(rgba(255,255,255,0.05) 1px, transparent 1px);
+    background-size: 15px 15px;
+}
+
+/* 9. 3D Tiles */
+body.bg-3dtiles::before {
+    background-color: transparent;
+    background-image: 
+        linear-gradient(30deg, rgba(255,255,255,0.02) 12%, transparent 12.5%, transparent 87%, rgba(255,255,255,0.02) 87.5%, rgba(255,255,255,0.02)), 
+        linear-gradient(150deg, rgba(255,255,255,0.02) 12%, transparent 12.5%, transparent 87%, rgba(255,255,255,0.02) 87.5%, rgba(255,255,255,0.02)), 
+        linear-gradient(30deg, rgba(255,255,255,0.02) 12%, transparent 12.5%, transparent 87%, rgba(255,255,255,0.02) 87.5%, rgba(255,255,255,0.02)), 
+        linear-gradient(150deg, rgba(255,255,255,0.02) 12%, transparent 12.5%, transparent 87%, rgba(255,255,255,0.02) 87.5%, rgba(255,255,255,0.02)), 
+        linear-gradient(60deg, rgba(255,255,255,0.02) 25%, transparent 25.5%, transparent 75%, rgba(255,255,255,0.02) 75%, rgba(255,255,255,0.02)), 
+        linear-gradient(60deg, rgba(255,255,255,0.02) 25%, transparent 25.5%, transparent 75%, rgba(255,255,255,0.02) 75%, rgba(255,255,255,0.02));
+    background-size: 20px 35px;
+    background-position: 0 0, 0 0, 10px 17.5px, 10px 17.5px, 0 0, 10px 17.5px;
+}
+
+/* 10. Tiles */
+body.bg-tiles::before {
+    background-image: 
+        linear-gradient(to right, rgba(255,255,255,0.02) 1px, transparent 1px),
+        linear-gradient(to bottom, rgba(255,255,255,0.02) 1px, transparent 1px);
+    background-size: 30px 30px;
+}
+
+/* 11. Triangles */
+body.bg-triangles::before {
+    background-image: 
+        linear-gradient(45deg, rgba(255,255,255,0.02) 25%, transparent 25%), 
+        linear-gradient(-45deg, rgba(255,255,255,0.02) 25%, transparent 25%), 
+        linear-gradient(45deg, transparent 75%, rgba(255,255,255,0.02) 75%), 
+        linear-gradient(-45deg, transparent 75%, rgba(255,255,255,0.02) 75%);
+    background-size: 20px 20px;
+    background-position: 0 0, 0 10px, 10px -10px, -10px 0px;
+}
+
+/* 12. Zig Zag */
+body.bg-zigzag::before {
+    background: 
+        linear-gradient(135deg, rgba(255,255,255,0.02) 25%, transparent 25%) -10px 0,
+        linear-gradient(225deg, rgba(255,255,255,0.02) 25%, transparent 25%) -10px 0,
+        linear-gradient(315deg, rgba(255,255,255,0.02) 25%, transparent 25%),
+        linear-gradient(45deg, rgba(255,255,255,0.02) 25%, transparent 25%);
+    background-size: 20px 20px;
+}

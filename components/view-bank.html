@@ -1,0 +1,163 @@
+<div id="view-bank" class="hidden">
+            <div class="bank-container">
+                <div class="sec-header" style="border-bottom:none; margin-bottom:10px; font-size:16px;">
+                    <div>
+                        <button id="evt-bind-33" class="btn-sm" style="margin-right:10px; background:var(--bg-2); border:1px solid var(--border); color:var(--text); padding:4px 10px; border-radius:4px; cursor:pointer;" ><i class="fa-solid fa-arrow-left"></i> Back</button>
+                        <span><i class="fa-solid fa-building-columns accent"></i> Dalal Bank Dashboard</span>
+                        <span class="badge mono" style="font-size:10px;">CREDIT & LEVERAGE</span>
+                    </div>
+                </div>
+                
+                <div class="bank-grid">
+                    <!-- CIBIL Card -->
+                    <div class="bank-card">
+                        <div class="sec-header" style="margin: -20px -20px 20px -20px; padding: 0 20px; background: rgba(0,0,0,0.2);">
+                            <span><i class="fa-solid fa-gauge-high"></i> CIBIL Score</span>
+                        </div>
+                        <div class="cibil-display">
+                            <div class="cibil-circle">
+                                <svg viewBox="0 0 100 100" class="cibil-svg">
+                                    <circle cx="50" cy="50" r="45" class="cibil-bg"></circle>
+                                    <circle cx="50" cy="50" r="45" class="cibil-fg" id="cibil-progress"></circle>
+                                </svg>
+                                <div class="cibil-val" id="cibil-score">750</div>
+                            </div>
+                            <div class="cibil-status" id="cibil-status">Excellent</div>
+                        </div>
+                    </div>
+
+                    <!-- Loan Application -->
+                    <div class="bank-card">
+                        <div class="sec-header" style="margin: -20px -20px 20px -20px; padding: 0 20px; background: rgba(0,0,0,0.2);">
+                            <span><i class="fa-solid fa-hand-holding-dollar"></i> Apply for Capital</span>
+                        </div>
+                        <div class="fg">
+                            <label style="display:flex; justify-content:space-between;">Principal Amount <span id="loan-max-eligibility" style="color:var(--orange); font-size:11px; text-transform:none;">Max: ₹ 0.00</span></label>
+                            <input type="number" id="loan-amount" class="fc mono" placeholder="100,000" min="1000" step="1000">
+                        </div>
+                        <div class="fg">
+                            <label>Term (Days)</label>
+                            <select id="loan-term" class="fc">
+                                <option value="1">1 Day</option>
+                                <option value="3">3 Days</option>
+                                <option value="5">5 Days</option>
+                                <option value="7">7 Days</option>
+                                <option value="14">14 Days</option>
+                            </select>
+                        </div>
+                        <div class="loan-quote">
+                            <div class="stat" style="align-items:flex-start;"><span class="stat-label">Interest Rate</span><span class="stat-val mono" id="loan-rate" style="color:var(--orange)">8.5% APR</span></div>
+                            <div class="stat" style="align-items:flex-end;"><span class="stat-label">Daily EMI</span><span class="stat-val mono" id="loan-emi" style="color:var(--text-bright)">₹ 0.00</span></div>
+                        </div>
+                        <button class="btn-buy uiverse-btn" id="btn-take-loan" style="margin-top:auto;flex:none;width:100%;">
+                            <div class="button-outer">
+                                <div class="button-inner">
+                                    <span><i class="fa-solid fa-file-signature"></i> Accept & Disburse Funds</span>
+                                </div>
+                            </div>
+                        </button>
+                    </div>
+
+                    <!-- Active Loans -->
+                    <div class="bank-card bank-card-full">
+                        <div class="sec-header" style="margin: -20px -20px 0 -20px; padding: 0 20px; background: rgba(0,0,0,0.2);">
+                            <span><i class="fa-solid fa-book-open"></i> Active Liabilities</span>
+                        </div>
+                        <div class="table-wrap" style="margin:0 -20px -20px -20px; max-height: 400px;">
+                            <table class="dtable" style="margin:0;">
+                                <thead>
+                                    <tr>
+                                        <th>ID</th>
+                                        <th class="r">Principal</th>
+                                        <th class="r">Interest</th>
+                                        <th class="r">Daily EMI</th>
+                                        <th class="r">Days Left</th>
+                                        <th class="r">Action</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="bank-loans-tbody">
+                                    <tr><td colspan="6" class="empty">No active loans</td></tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+
+                    <!-- Credit History -->
+                    <div class="bank-card bank-card-full" style="margin-top: 20px;">
+                        <div class="sec-header" style="margin: -20px -20px 0 -20px; padding: 0 20px; background: rgba(0,0,0,0.2);">
+                            <span><i class="fa-solid fa-clock-rotate-left"></i> Credit History</span>
+                        </div>
+                        <div class="table-wrap" style="margin:0 -20px -20px -20px; max-height: 300px;">
+                            <table class="dtable" style="margin:0;">
+                                <thead>
+                                    <tr>
+                                        <th>ID</th>
+                                        <th class="r">Principal</th>
+                                        <th class="r">Term</th>
+                                        <th class="r">Closing Day</th>
+                                        <th class="r">Status</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="bank-history-tbody">
+                                    <tr><td colspan="5" class="empty">No credit history</td></tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                    
+                    <!-- Fixed Deposits -->
+                    <div class="bank-card">
+                        <div class="sec-header" style="margin: -20px -20px 20px -20px; padding: 0 20px; background: rgba(0,0,0,0.2);">
+                            <span><i class="fa-solid fa-piggy-bank"></i> Open Fixed Deposit</span>
+                        </div>
+                        <div class="fg">
+                            <label style="display:flex; justify-content:space-between;">Deposit Amount <span id="fd-max-balance" style="color:var(--green); font-size:11px; text-transform:none;">Avail: ₹ 0.00</span></label>
+                            <input type="number" id="fd-amount" class="fc mono" placeholder="100,000" min="1000" step="1000">
+                        </div>
+                        <div class="fg">
+                            <label>Term (Days)</label>
+                            <select id="fd-term" class="fc">
+                                <option value="5">5 Days</option>
+                                <option value="10">10 Days</option>
+                                <option value="15">15 Days</option>
+                            </select>
+                        </div>
+                        <div class="loan-quote">
+                            <div class="stat" style="align-items:flex-start;"><span class="stat-label">Interest Rate</span><span class="stat-val mono" id="fd-rate" style="color:var(--green)">5.0% APR</span></div>
+                            <div class="stat" style="align-items:flex-end;"><span class="stat-label">Maturity Amount</span><span class="stat-val mono" id="fd-maturity" style="color:var(--text-bright)">₹ 0.00</span></div>
+                        </div>
+                        <button class="btn-buy uiverse-btn" id="btn-open-fd" style="margin-top:auto;flex:none;width:100%;">
+                            <div class="button-outer">
+                                <div class="button-inner">
+                                    <span><i class="fa-solid fa-lock"></i> Lock Funds</span>
+                                </div>
+                            </div>
+                        </button>
+                    </div>
+
+                    <!-- Active FDs -->
+                    <div class="bank-card">
+                        <div class="sec-header" style="margin: -20px -20px 0 -20px; padding: 0 20px; background: rgba(0,0,0,0.2);">
+                            <span><i class="fa-solid fa-vault"></i> Active Deposits</span>
+                        </div>
+                        <div class="table-wrap" style="margin:0 -20px -20px -20px; max-height: 400px;">
+                            <table class="dtable" style="margin:0;">
+                                <thead>
+                                    <tr>
+                                        <th>ID</th>
+                                        <th class="r">Principal</th>
+                                        <th class="r">Interest</th>
+                                        <th class="r">Days Left</th>
+                                        <th class="r">Action</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="bank-fds-tbody">
+                                    <tr><td colspan="5" class="empty">No active deposits</td></tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+        </div>

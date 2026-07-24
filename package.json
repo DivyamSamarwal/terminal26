@@ -1,0 +1,14 @@
+{
+  "name": "tradingterminal",
+  "version": "2.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "node server.js",
+    "lint": "npx eslint .",
+    "test": "node --test tests/*.test.js"
+  },
+  "dependencies": {
+    "@eslint/js": "^10.0.1"
+  }
+}

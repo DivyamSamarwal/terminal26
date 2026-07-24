@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Trading Terminal - Custom Bot Studio</title>
+    <link rel="stylesheet" href="css/styles.css?v=3">
+    <!-- CodeMirror -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.13/codemirror.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.13/theme/monokai.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.13/codemirror.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.13/mode/javascript/javascript.min.js"></script>
+    <style>
+        body { margin: 0; height: 100vh; display: flex; background: var(--bg-0); color: var(--text); overflow: hidden; }
+        .studio-page-layout { display: flex; width: 100vw; height: 100vh; }
+        .studio-sidebar { width: 320px; background: var(--bg-1); border-right: 1px solid var(--border); display: flex; flex-direction: column; padding: 24px; box-sizing: border-box; z-index: 10; box-shadow: 5px 0 20px rgba(0,0,0,0.3); }
+        .studio-main { flex: 1; display: flex; flex-direction: column; padding: 24px; box-sizing: border-box; }
+        
+        .CodeMirror { flex: 1; min-height: 0 !important; height: 100% !important; border: 1px solid var(--border); border-radius: 6px; font-size: 15px !important; }
+        .CodeMirror-scroll { min-height: 0 !important; height: 100% !important; }
+        
+        #custom-bot-console { height: 250px; background: rgba(0,0,0,0.8); border: 1px solid var(--border); margin-top: 20px; padding: 15px; overflow-y: auto; font-family: var(--mono); font-size: 13px; border-radius: 6px; box-shadow: inset 0 2px 10px rgba(0,0,0,0.5); margin-bottom:0; }
+        
+        .fc { background: var(--bg-1); color: var(--text-bright); border: 1px solid var(--border); border-radius: 4px; }
+        .fc:focus { border-color: var(--accent); outline: none; }
+    </style>
+</head>
+<body>
+    <div class="studio-page-layout">
+        <div class="studio-sidebar">
+            <h2 style="margin-top:0; margin-bottom:24px; color:var(--text-bright); display:flex; align-items:center; gap:10px;">
+                <span>Bot Studio</span>
+                <span class="badge" style="background:var(--accent); color:#fff; font-size:11px; padding:3px 8px; border-radius:4px; font-weight:bold;">PRO</span>
+            </h2>
+            <div id="custom-bot-list" style="flex:1; overflow-y:auto; display:flex; flex-direction:column; gap:10px;"></div>
+            <button id="evt-bind-60" class="btn" style="width:100%; margin-top:20px; padding:12px; border:1px dashed var(--text-dim); background:transparent; color:var(--text-bright); border-radius:6px; cursor:pointer; transition: all 0.2s;"   >+ Create New Bot</button>
+        </div>
+        
+        <div class="studio-main">
+            <div style="display:flex; gap:24px; margin-bottom:20px;">
+                <div style="flex:1;">
+                    <label style="display:block; font-size:12px; color:var(--text-dim); margin-bottom:8px; font-weight:bold; letter-spacing:0.5px;">STRATEGY NAME</label>
+                    <input type="text" id="custom-bot-name" class="fc" placeholder="e.g. My Mean Reversion Bot" style="width:100%; box-sizing:border-box; padding:12px; font-size:14px;">
+                </div>
+                <div style="flex:1;">
+                    <label style="display:block; font-size:12px; color:var(--text-dim); margin-bottom:8px; font-weight:bold; letter-spacing:0.5px;">TEMPLATE / EXAMPLES</label>
+                    <select id="custom-bot-template" class="fc" style="width:100%; box-sizing:border-box; padding:12px; font-size:14px;" >
+                        <option value="">-- Start with Boilerplate --</option>
+                        <option value="EMA_CROSS">EMA Fast/Slow Crossover</option>
+                        <option value="RSI_SCALP">RSI Mean Reversion (Scalp)</option>
+                        <option value="DRAWING_DEMO">Chart Overlay & Drawing Demo</option>
+                        <option value="ARB_HEDGE">Cross-Asset Arbitrage (Memory Demo)</option>
+                    </select>
+                </div>
+            </div>
+            
+            <label style="display:block; font-size:12px; color:var(--text-dim); margin-bottom:8px; font-weight:bold; letter-spacing:0.5px;">STRATEGY LOGIC (JAVASCRIPT)</label>
+            <textarea id="custom-bot-code" spellcheck="false"></textarea>
+            
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-top:20px;">
+                <div style="font-size:12px; color:var(--text-dim); line-height:1.6; background:rgba(255,255,255,0.03); padding:10px 15px; border-radius:6px; border:1px solid rgba(255,255,255,0.05);">
+                    <strong>Available API:</strong> <code style="color:#00d2ff">context.stock.ltp</code>, <code style="color:#00d2ff">context.history</code> (Array), 
+                    <code style="color:#00d2ff">context.utils.ema(arr, period)</code>, <code style="color:#00d2ff">context.utils.rsi(arr, period)</code>, <code style="color:#00d2ff">context.log(msg)</code><br/>
+                    <strong>Expected Returns:</strong> <code>"LONG"</code>, <code>"SHORT"</code>, or <code>null</code>.
+                </div>
+                <div style="display:flex; gap:12px;">
+                    <button id="custom-bot-delete-btn" style="background:transparent; color:var(--red); border:1px solid var(--red); padding:12px 20px; border-radius:6px; cursor:pointer; font-size:14px; font-weight:600; display:none; transition:all 0.2s;"   >Delete Bot</button>
+                    <button id="evt-bind-61" style="background:transparent; color:var(--text-bright); border:1px solid rgba(255,255,255,0.2); padding:12px 20px; border-radius:6px; cursor:pointer; font-size:14px; font-weight:600; transition:all 0.2s;"   >Run Syntax Check</button>
+                    <button id="evt-bind-62" style="background:var(--accent); color:#fff; border:none; padding:12px 30px; border-radius:6px; cursor:pointer; font-size:14px; font-weight:600; box-shadow: 0 4px 12px rgba(0,210,255,0.3); transition:all 0.2s;"   >Deploy to Engine</button>
+                </div>
+            </div>
+            
+            <pre id="custom-bot-console">> Bot Studio Initialized.</pre>
+        </div>
+    </div>
+
+    <script type="module" src="js/main.js"></script>
+</body>
+</html>

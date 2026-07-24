@@ -1,0 +1,187 @@
+/* Terminal Customization Styles */
+
+.tc-scroll-panel::-webkit-scrollbar {
+    width: 6px;
+}
+.tc-scroll-panel::-webkit-scrollbar-track {
+    background: transparent;
+}
+.tc-scroll-panel::-webkit-scrollbar-thumb {
+    background: var(--bg-3);
+    border-radius: 4px;
+}
+
+/* Option Cards (Theme, Font, Background) */
+.tc-option-card {
+    background: var(--bg-1);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 12px;
+    cursor: pointer;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    position: relative;
+    transition: all 0.2s ease;
+}
+
+.tc-option-card:hover {
+    background: var(--bg-2);
+    border-color: var(--border-light);
+}
+
+.tc-option-card.active {
+    border-color: var(--green);
+    background: var(--bg-2);
+}
+
+.tc-option-card.active::after {
+    content: '\f058'; /* FontAwesome check-circle */
+    font-family: 'Font Awesome 6 Free';
+    font-weight: 900;
+    position: absolute;
+    top: -8px;
+    right: -8px;
+    color: var(--green);
+    background: var(--bg-0);
+    border-radius: 50%;
+    font-size: 16px;
+    line-height: 1;
+}
+
+.tc-card-icon {
+    font-size: 24px;
+    color: var(--text-dim);
+}
+
+.tc-option-card.active .tc-card-icon {
+    color: var(--text-bright);
+}
+
+.tc-card-label {
+    font-size: 11px;
+    color: var(--text-dim);
+    font-weight: 600;
+    text-align: center;
+}
+
+.tc-option-card.active .tc-card-label {
+    color: var(--text-bright);
+}
+
+/* Color Circles (Accent, Chart Colors) */
+.tc-color-circle {
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    border: 2px solid transparent;
+    cursor: pointer;
+    position: relative;
+    transition: transform 0.1s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.tc-color-circle:hover {
+    transform: scale(1.1);
+}
+
+.tc-color-circle.active::after {
+    content: '\f00c'; /* FontAwesome check */
+    font-family: 'Font Awesome 6 Free';
+    font-weight: 900;
+    position: absolute;
+    color: rgba(255,255,255,0.9);
+    font-size: 14px;
+    text-shadow: 0 0 2px rgba(0,0,0,0.5);
+}
+.tc-color-circle.active.light-color::after {
+    color: rgba(0,0,0,0.8);
+    text-shadow: none;
+}
+
+/* Specific chart color card */
+.tc-chart-color-card {
+    background: var(--bg-1);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 12px;
+    cursor: pointer;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    position: relative;
+    transition: all 0.2s ease;
+}
+
+.tc-chart-color-card:hover {
+    background: var(--bg-2);
+}
+
+.tc-chart-color-card.active {
+    border-color: var(--green);
+    background: var(--bg-2);
+}
+
+.tc-chart-color-card.active::after {
+    content: '\f058';
+    font-family: 'Font Awesome 6 Free';
+    font-weight: 900;
+    position: absolute;
+    top: -8px;
+    right: -8px;
+    color: var(--green);
+    background: var(--bg-0);
+    border-radius: 50%;
+    font-size: 16px;
+    line-height: 1;
+}
+
+.tc-cc-dots {
+    display: flex;
+    gap: 4px;
+}
+.tc-cc-dot {
+    width: 14px;
+    height: 14px;
+    border-radius: 50%;
+}
+
+/* Font Card */
+.tc-font-card {
+    background: var(--bg-1);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 12px;
+    cursor: pointer;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 4px;
+    position: relative;
+    transition: all 0.2s ease;
+}
+.tc-font-card:hover { background: var(--bg-2); }
+.tc-font-card.active { border-color: var(--green); background: var(--bg-2); }
+.tc-font-card.active::after {
+    content: '\f058';
+    font-family: 'Font Awesome 6 Free';
+    font-weight: 900;
+    position: absolute;
+    top: -8px;
+    right: -8px;
+    color: var(--green);
+    background: var(--bg-0);
+    border-radius: 50%;
+    font-size: 16px;
+    line-height: 1;
+}
+.tc-font-aa { font-size: 20px; font-weight: 600; color: var(--text-bright); line-height: 1; display: flex; align-items: center; justify-content: center; height: 28px; }
+.tc-font-label { font-size: 11px; color: var(--text-dim); }
+
