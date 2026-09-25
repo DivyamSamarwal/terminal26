@@ -202,4 +202,46 @@ export function initUIEvents() {
         el_evt_bind_62.addEventListener('mouseout', function() { el_evt_bind_62.style.filter='none' });
     }
 
+    // Bot toggle button (START/STOP ENGINE)
+    var btnToggleBot = document.getElementById("btn-toggle-bot");
+    if (btnToggleBot) {
+        btnToggleBot.addEventListener("click", function() {
+            BotManager.toggle();
+        });
+    }
+
+    // Bot risk slider
+    var botRiskSlider = document.getElementById("bot-risk-slider");
+    if (botRiskSlider) {
+        botRiskSlider.addEventListener("input", function() {
+            var valEl = document.getElementById("bot-risk-val");
+            if (valEl) valEl.textContent = this.value + "%";
+        });
+    }
+
+    // Hook BotManager.updateUI into window.selectStock for stock switching
+    var _origWinSelectStock = window.selectStock;
+    if (typeof _origWinSelectStock === "function") {
+        window.selectStock = function(stockArg) {
+            _origWinSelectStock(stockArg);
+            var t = (typeof stockArg === "string") ? stockArg : (stockArg ? stockArg.ticker : null);
+            if (t) BotManager.updateUI(t);
+        };
+    }
+
+    // Initialize Custom Bots from LocalStorage
+    if (!state || !state.customStrategies || Object.keys(state.customStrategies).length === 0) {
+        try {
+            var saved = localStorage.getItem("customStrategies");
+            if (saved) {
+                if (!state.customStrategies) state.customStrategies = {};
+                state.customStrategies = JSON.parse(saved);
+                if (typeof updateStrategyDropdown === "function") {
+                    updateStrategyDropdown();
+                }
+            }
+        } catch(e) {
+            console.error("Failed to load custom bots", e);
+        }
+    }
 }

@@ -26,8 +26,33 @@ let _lastHostTickAt = null;
 let _marketSynced = false;
 let _sessionStartedAt = null;
 let _connectionRoute = "--";
-const PEER_HEARTBEAT_TIMEOUT_MS = 15000;
+const PEER_HEARTBEAT_TIMEOUT_MS = 30000;
 const _lastPeerResponseAt = new WeakMap();
+
+// Multi-STUN + Free Public TURN (Metered OpenRelay) for NAT traversal across different networks/ISPs
+const PEER_CONFIG = {
+    config: {
+        iceServers: [
+            { urls: 'stun:stun.l.google.com:19302' },
+            { urls: 'stun:stun1.l.google.com:19302' },
+            { urls: 'stun:stun2.l.google.com:19302' },
+            { urls: 'stun:stun3.l.google.com:19302' },
+            { urls: 'stun:stun4.l.google.com:19302' },
+            { urls: 'stun:stun.cloudflare.com:3478' },
+            { urls: 'stun:global.stun.twilio.com:3478' },
+            {
+                urls: [
+                    'turn:openrelay.metered.ca:80',
+                    'turn:openrelay.metered.ca:443',
+                    'turn:openrelay.metered.ca:443?transport=tcp'
+                ],
+                username: 'openrelayproject',
+                credential: 'openrelayproject'
+            }
+        ],
+        iceCandidatePoolSize: 10
+    }
+};
 
 // Called by app.js whenever a news item fires, so we can piggyback it on the next tick
 export function queueNewsForBroadcast(newsItem) {
@@ -45,13 +70,91 @@ function notify(title, body, type) {
     toast(title, body, type);
 }
 
+
+function escapeHTML(str) {
+    if (!str) return "";
+    return String(str)
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;")
+        .replace(/'/g, "&#039;");
+}
+
+function setButtonLoading(btnId, labelId, isLoading, loadingText, defaultText, defaultIcon) {
+    const btn = document.getElementById(btnId);
+    const label = document.getElementById(labelId);
+    if (!btn) return;
+    if (isLoading) {
+        btn.style.pointerEvents = "none";
+        btn.style.opacity = "0.75";
+        if (label) {
+            label.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> ' + loadingText;
+        }
+    } else {
+        btn.style.pointerEvents = "auto";
+        btn.style.opacity = "1";
+        if (label) {
+            label.innerHTML = '<i class="' + defaultIcon + '"></i> ' + defaultText;
+        }
+    }
+}
+
+function resetButtonStates() {
+    setButtonLoading("btn-mp-host", "btn-mp-host-label", false, "", "Initialize Host Server", "fa-solid fa-tower-broadcast");
+    setButtonLoading("btn-mp-join", "btn-mp-join-label", false, "", "Connect to Host", "fa-solid fa-plug");
+}
+
+function copyCodeToClipboard() {
+    const codeElem = document.getElementById("mp-room-code-display");
+    const code = codeElem ? codeElem.innerText.trim() : "";
+    if (!code || code === "----") return;
+    const copyBtn = document.getElementById("btn-mp-copy-code");
+    const onCopied = () => {
+        if (copyBtn) {
+            copyBtn.innerHTML = '<i class="fa-solid fa-check"></i> Copied!';
+            copyBtn.classList.add("copied");
+            setTimeout(() => {
+                copyBtn.innerHTML = '<i class="fa-regular fa-copy"></i> Copy Code';
+                copyBtn.classList.remove("copied");
+            }, 2000);
+        }
+        notify("Room Code Copied", "Room code " + code + " copied to clipboard. Share it with other traders!", "success");
+    };
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+        navigator.clipboard.writeText(code).then(onCopied).catch(() => {
+            notify("Room Code", code, "info");
+        });
+    } else {
+        notify("Room Code", code, "info");
+    }
+}
+
 export function initMultiplayer() {
     const hostBtn = document.getElementById("btn-mp-host");
     const joinBtn = document.getElementById("btn-mp-join");
     const discBtn = document.getElementById("btn-mp-disconnect");
+    const joinInput = document.getElementById("mp-join-code");
+    const copyBtn = document.getElementById("btn-mp-copy-code");
+    const codeBox = document.getElementById("mp-room-code-box");
     if (hostBtn) hostBtn.addEventListener("click", hostGame);
     if (joinBtn) joinBtn.addEventListener("click", joinGame);
     if (discBtn) discBtn.addEventListener("click", disconnect);
+    if (copyBtn) copyBtn.addEventListener("click", copyCodeToClipboard);
+    if (codeBox) {
+        codeBox.addEventListener("click", function(e) {
+            if (e.target !== copyBtn && (!copyBtn || !copyBtn.contains(e.target))) {
+                copyCodeToClipboard();
+            }
+        });
+    }
+    if (joinInput) {
+        joinInput.addEventListener("keydown", function(e) {
+            if (e.key === "Enter") {
+                joinGame();
+            }
+        });
+    }
 }
 
 function updateUIConnected(role, code) {
@@ -60,6 +163,7 @@ function updateUIConnected(role, code) {
     let sc = document.getElementById("mp-status-card"); if (sc) sc.style.display = "block";
     let rt = document.getElementById("mp-role-text"); if (rt) rt.innerText = "Role: " + role;
     let cd = document.getElementById("mp-room-code-display"); if (cd) cd.innerText = code;
+    resetButtonStates();
     _sessionStartedAt = Date.now();
     _lastHostTickAt = null;
     _marketSynced = role === "Host";
@@ -98,11 +202,12 @@ function renderConnectionDetails() {
     const jitter = getJitter();
     const lastTickAge = _lastHostTickAt === null ? "--" : Math.max(0, (Date.now() - _lastHostTickAt) / 1000).toFixed(1) + "s ago";
     const hostPeerStatus = clientConnections.length === 0 ? "Waiting for peer" : _connectionRoute;
-    setHealthDetail("mp-route-text", "Route: " + (isMultiplayerHost ? hostPeerStatus : _connectionRoute));
-    setHealthDetail("mp-jitter-text", "Jitter: " + (jitter === null ? "--" : "±" + jitter + " ms"));
-    setHealthDetail("mp-last-tick-text", "Last host tick: " + lastTickAge);
-    setHealthDetail("mp-sync-text", "Market state: " + (isMultiplayerHost ? "Broadcasting" : (_marketSynced ? "Synced" : "Syncing...")));
-    setHealthDetail("mp-session-text", "Session: " + (_sessionStartedAt === null ? "--" : formatSessionDuration(Date.now() - _sessionStartedAt)));
+    setHealthDetail("mp-route-text", isMultiplayerHost ? hostPeerStatus : _connectionRoute);
+    setHealthDetail("mp-jitter-text", jitter === null ? "--" : "±" + jitter + " ms");
+    setHealthDetail("mp-last-tick-text", lastTickAge);
+    setHealthDetail("mp-sync-text", isMultiplayerHost ? "Broadcasting" : (_marketSynced ? "Synced" : "Syncing..."));
+    setHealthDetail("mp-session-text", _sessionStartedAt === null ? "--" : formatSessionDuration(Date.now() - _sessionStartedAt));
+    setHealthDetail("mp-peers-count-text", isMultiplayerHost ? (clientConnections.length + " connected") : (hostConnection ? "Connected to Host" : "--"));
 }
 
 function startLatencyProbe() {
@@ -129,13 +234,21 @@ function startHostLatencyProbe() {
     if (_hostLatencyInterval) clearInterval(_hostLatencyInterval);
     const pingClients = () => {
         [...clientConnections].forEach(conn => {
-            const lastResponse = _lastPeerResponseAt.get(conn) || 0;
-            if (!conn.open || Date.now() - lastResponse > PEER_HEARTBEAT_TIMEOUT_MS) {
+            if (!conn.open) {
+                removeClientConnection(conn);
+                return;
+            }
+            const lastResponse = _lastPeerResponseAt.get(conn) || Date.now();
+            if (Date.now() - lastResponse > PEER_HEARTBEAT_TIMEOUT_MS) {
                 try { conn.close(); } catch (_) {}
                 removeClientConnection(conn, "Connection to a trader timed out.");
                 return;
             }
-            conn.send(JSON.stringify({ type: 'HOST_PING', sentAt: Date.now() }));
+            try {
+                conn.send(JSON.stringify({ type: 'HOST_PING', sentAt: Date.now() }));
+            } catch (_) {
+                removeClientConnection(conn);
+            }
         });
     };
     pingClients();
@@ -196,31 +309,66 @@ function updateUIDisconnected() {
     let jc = document.getElementById("mp-join-card"); if (jc) jc.style.display = "block";
     let sc = document.getElementById("mp-status-card"); if (sc) sc.style.display = "none";
     let pu = document.getElementById("mp-peers-ul"); if (pu) pu.innerHTML = "";
+    resetButtonStates();
 }
 
 function updateClientList() {
     let ul = document.getElementById("mp-peers-ul");
+    let badge = document.getElementById("mp-peer-counter-badge");
+    let countElem = document.getElementById("mp-peers-count-text");
     if (!ul) return;
     ul.innerHTML = "";
     if (isMultiplayerHost) {
-        clientConnections.forEach(conn => {
+        if (badge) badge.textContent = String(clientConnections.length);
+        if (countElem) countElem.textContent = clientConnections.length + " connected";
+        if (clientConnections.length === 0) {
             let li = document.createElement("li");
-            li.innerText = "🟢 Peer: " + conn.peer;
+            li.style.color = "var(--text-dim)";
+            li.style.fontSize = "12px";
+            li.style.fontStyle = "italic";
+            li.style.padding = "8px 4px";
+            li.innerHTML = '<i class="fa-solid fa-satellite-dish" style="margin-right:8px; color:var(--accent);"></i> Waiting for traders to join... Share your Room Code above!';
             ul.appendChild(li);
-        });
+        } else {
+            clientConnections.forEach(conn => {
+                let li = document.createElement("li");
+                li.className = "mp-peer-item";
+                li.innerHTML = '<div style="display:flex; align-items:center; gap:8px;">' +
+                    '<span class="mp-pulse-dot" style="width:7px; height:7px;"></span>' +
+                    '<span class="mono" style="font-weight:600; color:var(--text-bright);">' + escapeHTML(conn.peer) + '</span>' +
+                    '</div>' +
+                    '<span class="mp-badge-client"><i class="fa-solid fa-user" style="margin-right:4px;"></i> TRADER</span>';
+                ul.appendChild(li);
+            });
+        }
     } else if (isMultiplayerClient && hostConnection) {
+        if (badge) badge.textContent = "1";
+        if (countElem) countElem.textContent = "Connected to Host";
         let li = document.createElement("li");
-        li.innerText = "🟢 Host: " + hostConnection.peer;
+        li.className = "mp-peer-item";
+        li.innerHTML = '<div style="display:flex; align-items:center; gap:8px;">' +
+            '<i class="fa-solid fa-server" style="color:var(--accent);"></i>' +
+            '<span class="mono" style="font-weight:600; color:var(--text-bright);">' + escapeHTML(hostConnection.peer) + '</span>' +
+            '</div>' +
+            '<span class="mp-badge-host"><i class="fa-solid fa-tower-broadcast" style="margin-right:4px;"></i> HOST EXCHANGE</span>';
         ul.appendChild(li);
+    } else {
+        if (badge) badge.textContent = "0";
+        if (countElem) countElem.textContent = "--";
     }
 }
 
 export function hostGame() {
+    if (typeof Peer === "undefined") {
+        notify("PeerJS Offline", "WebRTC library not loaded. Check internet connection.", "error");
+        return;
+    }
     // Bug 6 fix: block if already in any multiplayer session
     if (peer || isMultiplayerHost || isMultiplayerClient) return;
+    setButtonLoading("btn-mp-host", "btn-mp-host-label", true, "Initializing Host...", "Initialize Host Server", "fa-solid fa-tower-broadcast");
     roomCode = generateRoomCode();
     
-    peer = new Peer(roomCode);
+    peer = new Peer(roomCode, PEER_CONFIG);
     
     peer.on('open', (id) => {
         isMultiplayerHost = true;
@@ -232,18 +380,16 @@ export function hostGame() {
     });
 
     peer.on('connection', (conn) => {
-        clientConnections.push(conn);
         _lastPeerResponseAt.set(conn, Date.now());
         _connectionRoute = "Checking...";
-        notify("Trader Joined", "A new trader connected to your market!", "success");
-        updateClientList();
 
         let syncFn = () => {
             let fullState = {
                 type: 'SYNC_STATE',
+                day: state.day,
+                time: state.time,
+                exchangeRates: window._EXCHANGE_RATES || {},
                 stocks: marketStocks.map(s => ({
-                    // Bug 2 fix: include all price fields so the client renders
-                    // correct prices immediately instead of waiting for the next tick
                     ticker: s.ticker,
                     ltp: s.ltp,
                     open: s.open,
@@ -254,13 +400,20 @@ export function hostGame() {
                     bid: s.bid,
                     available_liquidity: s.available_liquidity,
                     haltUntil: s.haltUntil,
+                    iv: s.iv,
                     history: s.history,
                     volumeHistory: s.volumeHistory
                 }))
             };
-            conn.send(JSON.stringify(fullState));
+            try { conn.send(JSON.stringify(fullState)); } catch (_) {}
         };
         const onClientOpen = () => {
+            if (!clientConnections.includes(conn)) {
+                clientConnections.push(conn);
+            }
+            _lastPeerResponseAt.set(conn, Date.now());
+            notify("Trader Joined", "A new trader connected to your market!", "success");
+            updateClientList();
             syncFn();
             startHostLatencyProbe();
             detectConnectionRoute();
@@ -278,24 +431,37 @@ export function hostGame() {
         conn.on('close', () => {
             removeClientConnection(conn);
         });
+
+        conn.on('error', (err) => {
+            console.warn("[multiplayer host] Client connection error:", err);
+            removeClientConnection(conn);
+        });
     });
 
     peer.on('error', (err) => {
-        // Bug 6 fix: handle unavailable-id gracefully
         if (err.type === 'unavailable-id') {
             notify("Room Taken", "Code " + roomCode + " is taken. Trying a new one...", "info");
             peer.destroy();
             peer = null;
             isMultiplayerHost = false;
-            setTimeout(hostGame, 500); // retry with a new code
-        } else {
-            notify("WebRTC Error", err.type, "error");
+            setTimeout(hostGame, 500);
+        } else if (err.type === 'peer-unavailable') {
+            console.warn("[multiplayer host] Peer unavailable:", err);
+        } else if (err.type === 'server-error' || err.type === 'socket-error' || err.type === 'socket-closed') {
+            notify("Signaling Error", "Lost connection to PeerJS server: " + err.type, "error");
             disconnect();
+        } else {
+            // Non-fatal client negotiation error must NOT disconnect other traders
+            console.warn("[multiplayer host] Non-fatal WebRTC error:", err.type, err);
         }
     });
 }
 
 export function joinGame() {
+    if (typeof Peer === "undefined") {
+        notify("PeerJS Offline", "WebRTC library not loaded. Check internet connection.", "error");
+        return;
+    }
     // Bug 6 fix: block if already in any multiplayer session
     if (peer || isMultiplayerHost || isMultiplayerClient) return;
     let code = document.getElementById("mp-join-code").value.trim().toUpperCase();
@@ -303,19 +469,22 @@ export function joinGame() {
         notify("Missing Code", "Please enter a room code to join.", "error");
         return;
     }
+    setButtonLoading("btn-mp-join", "btn-mp-join-label", true, "Connecting to Host...", "Connect to Host", "fa-solid fa-plug");
     
-    peer = new Peer();
+    peer = new Peer(PEER_CONFIG);
     
     peer.on('open', (id) => {
-        hostConnection = peer.connect(code);
+        hostConnection = peer.connect(code, {
+            reliable: true
+        });
 
-        // Bug 6 fix: timeout if host never responds within 12 seconds
+        // Extended 30s timeout allows cross-network TURN/STUN NAT traversal
         _joinTimeoutHandle = setTimeout(() => {
             if (!isMultiplayerClient) {
-                notify("Join Timeout", "Host did not respond for code: " + code + ". Please try again.", "error");
+                notify("Join Timeout", "Host did not respond for code: " + code + ". Check connection or try again.", "error");
                 disconnect();
             }
-        }, 12000);
+        }, 30000);
         
         hostConnection.on('open', () => {
             // Bug 6 fix: cancel the join timeout now that we're connected
@@ -435,18 +604,18 @@ export function disconnect() {
     // Bug 8 fix: clear the stale room code
     roomCode = "";
 
-    // Clear any stuck pendingHostFill flags from pending orders
+    // Restart local clock and cleanup pending orders before clearing state
+    if (wasClient && window._restartClockFn) {
+        window._restartClockFn();
+    }
+
+    // Clear any stuck pendingHostFill flags from remaining pending orders
     if (state && state.pendingOrders) {
         state.pendingOrders.forEach(o => o.pendingHostFill = null);
     }
 
     updateUIDisconnected();
     notify("Disconnected", "Left the multiplayer session.", "info");
-
-    // Restart local clock only if we were a client (host clock was never stopped)
-    if (wasClient && window._restartClockFn) {
-        window._restartClockFn();
-    }
 }
 
 // ----------------------------------------------------------------------
@@ -562,6 +731,16 @@ function handleHostData(dataStr) {
             }
         } else if (msg.type === 'SYNC_STATE') {
             _marketSynced = true;
+            if (msg.day !== undefined && msg.time !== undefined) {
+                if (window._tickClientEngine) {
+                    window._tickClientEngine(msg.day, msg.time);
+                } else if (window.setClientTime) {
+                    window.setClientTime(msg.day, msg.time);
+                }
+            }
+            if (msg.exchangeRates && window._EXCHANGE_RATES) {
+                Object.assign(window._EXCHANGE_RATES, msg.exchangeRates);
+            }
             msg.stocks.forEach(hs => {
                 let localStock = stockMap ? stockMap[hs.ticker] : marketStocks.find(s => s.ticker === hs.ticker);
                 if (localStock) {
@@ -576,6 +755,7 @@ function handleHostData(dataStr) {
                     if (hs.bid !== undefined)               localStock.bid               = hs.bid;
                     if (hs.available_liquidity !== undefined) localStock.available_liquidity = hs.available_liquidity;
                     if (hs.haltUntil !== undefined)         localStock.haltUntil         = hs.haltUntil;
+                    if (hs.iv !== undefined)                localStock.iv                = hs.iv;
                     localStock.history = hs.history || [];
                     localStock.volumeHistory = hs.volumeHistory || [];
                 }
@@ -672,14 +852,10 @@ function handleHostData(dataStr) {
             if (msg.id && state && state.pendingOrders) {
                 let pOrder = state.pendingOrders.find(o => o.pendingHostFill === msg.id);
                 if (pOrder) {
-                    if (pOrder.tif === "FOK" || pOrder.tif === "IOC") {
-                        if (pOrder.lockedMargin) state.margin += pOrder.lockedMargin;
-                        // Bug 2 fix: mutate in-place instead of reassigning
-                        let _idx = state.pendingOrders.indexOf(pOrder);
-                        if (_idx !== -1) state.pendingOrders.splice(_idx, 1);
-                    } else {
-                        pOrder.pendingHostFill = null;
-                    }
+                    if (pOrder.lockedMargin) state.margin += pOrder.lockedMargin;
+                    // Mutate in-place to avoid stale array references and prevent infinite resend loop
+                    let _idx = state.pendingOrders.indexOf(pOrder);
+                    if (_idx !== -1) state.pendingOrders.splice(_idx, 1);
                 }
             }
         }
@@ -745,6 +921,8 @@ function handleClientData(conn, dataStr) {
             let pDecimals = stock.ltp < 10 ? 4 : 2;
             executionPrice = parseFloat(executionPrice.toFixed(pDecimals));
 
+            stock.volume = (stock.volume || 0) + fillQty;
+
             if (remainingQty > 0) {
                 // Partial fill: tell client what was filled and how much is left to retry
                 if (conn.open) conn.send(JSON.stringify({
@@ -760,8 +938,6 @@ function handleClientData(conn, dataStr) {
                     id: msg.id,
                     tif: msg.tif
                 }));
-                // Bug 5 fix: host records partial fills in its own market state
-                processEquityTrade(stock, msg.side, fillQty, executionPrice, false);
             } else {
                 // Full fill
                 if (conn.open) conn.send(JSON.stringify({
@@ -772,8 +948,6 @@ function handleClientData(conn, dataStr) {
                     price: executionPrice,
                     id: msg.id
                 }));
-                // Bug 5 fix: host records the full fill in its own market state
-                processEquityTrade(stock, msg.side, fillQty, executionPrice, false);
             }
         }
     } catch(e) {
@@ -870,9 +1044,8 @@ function applyHostTickToClient(msg) {
                 localStock.haltUntil = hs.haltUntil;
             }
             
-            // Bug 1 & 10 fix: skip push right after sync (avoids duplicate), and
-            // skip when price is unchanged (avoids redundant duplicate-tick entries).
-            if (!skipHistoryPush && localStock._prevTick !== hs.ltp) {
+            // Push to history on every tick to maintain accurate 1-minute chart cadence
+            if (!skipHistoryPush) {
                 localStock.history.push(hs.ltp);
                 localStock.volumeHistory.push(hs.volume);
                 if (localStock.history.length > 500) localStock.history.shift();

@@ -1743,8 +1743,10 @@ function setupListeners() {
 	var qtyInput = document.getElementById("order-qty");
 	document.querySelectorAll(".preset").forEach(function (btn) {
 		btn.addEventListener("click", function () {
-			qtyInput.value = parseInt(qtyInput.value || 0, 10) + parseInt(btn.dataset.v, 10);
-			updateOrderMargin();
+			if (btn.dataset.v !== undefined) {
+				qtyInput.value = parseInt(qtyInput.value || 0, 10) + parseInt(btn.dataset.v, 10);
+				updateOrderMargin();
+			}
 		});
 	});
 	qtyInput.addEventListener("input", updateOrderMargin);
@@ -1828,7 +1830,7 @@ function setupListeners() {
 			var stock = state.activeStock;
 			if (!stock) return;
 			var pos = state.positions[stock.ticker];
-			var basePrice = pos && pos.qty !== 0 ? pos.avg : stock.ltp;
+			var basePrice = pos && pos.qty !== 0 ? pos.avgPrice : stock.ltp;
 			var isShort = pos && pos.qty < 0;
 			// SL is below for long, above for short
 			var newSl = basePrice * (isShort ? 1 + pct / 100 : 1 - pct / 100);
@@ -1843,7 +1845,7 @@ function setupListeners() {
 			var stock = state.activeStock;
 			if (!stock) return;
 			var pos = state.positions[stock.ticker];
-			var basePrice = pos && pos.qty !== 0 ? pos.avg : stock.ltp;
+			var basePrice = pos && pos.qty !== 0 ? pos.avgPrice : stock.ltp;
 			var isShort = pos && pos.qty < 0;
 			// Target is above for long, below for short
 			var newTp = basePrice * (isShort ? 1 - pct / 100 : 1 + pct / 100);
@@ -4703,31 +4705,31 @@ function executeTrade(side) {
 			return;
 		}
 
+		// Send MARKET orders to host if we are a client
+		if (isMultiplayerClient) {
+			var fxRate = EXCHANGE_RATES[stock.currency] || 1;
+			var costINR = (executionPrice * qty) * fxRate;
+			var pos = state.positions[stock.ticker] || { qty: 0 };
+			var hasMargin = true;
+			if (side === "BUY" && pos.qty >= 0) {
+				if (state.margin < costINR) hasMargin = false;
+			} else if (side === "SHORT" || (side === "SELL" && pos.qty <= 0)) {
+				if (state.margin < costINR * 0.2) hasMargin = false;
+			}
+			if (!hasMargin) {
+				toast("Error", "Insufficient margin to place MARKET order", "error");
+				return;
+			}
+			sendOrderToHost(stock.ticker, side, qty, null, tif);
+			document.getElementById("order-qty").value = 1;
+			toast("Order Sent", "Waiting for host to fill...", "info");
+			return;
+		}
+
 		var fillQty = Math.min(qty, avail);
 		var remainingQty = qty - fillQty;
 
 		if (fillQty > 0) {
-			// Bug A fix: Send MARKET orders to host if we are a client
-			if (isMultiplayerClient) {
-				var fxRate = EXCHANGE_RATES[stock.currency] || 1;
-				var costINR = (executionPrice * fillQty) * fxRate;
-				var pos = state.positions[stock.ticker] || { qty: 0 };
-				var hasMargin = true;
-				if (side === "BUY" && pos.qty >= 0) {
-					if (state.margin < costINR) hasMargin = false;
-				} else if (side === "SHORT" || (side === "SELL" && pos.qty <= 0)) {
-					if (state.margin < costINR * 0.2) hasMargin = false;
-				}
-				if (!hasMargin) {
-					toast("Error", "Insufficient margin to place MARKET order", "error");
-					return;
-				}
-				sendOrderToHost(stock.ticker, side, fillQty, null, tif);
-				document.getElementById("order-qty").value = 1;
-				toast("Order Sent", "Waiting for host to fill...", "info");
-				return;
-			}
-
 			if (processEquityTrade(stock, side, fillQty, executionPrice)) {
 				stock.available_liquidity -= fillQty;
 
@@ -9253,16 +9255,23 @@ window._stopClientClockFn = function() {
     if (freezeBtn) freezeBtn.classList.add("on");
 };
 window._restartClockFn = function() {
-    // Bug 1 fix: when a client disconnects, purge any pendingOrders that were
-    // waiting for a host fill — the host is gone and will never respond, so
-    // leaving them in the queue causes an infinite retry loop.
+    // When a client disconnects, purge any pendingOrders that were
+    // waiting for a host fill and refund their locked margin in-place
     if (state && state.pendingOrders) {
-        state.pendingOrders = state.pendingOrders.filter(function(o) {
-            return !o.pendingHostFill;
-        });
+        for (var i = state.pendingOrders.length - 1; i >= 0; i--) {
+            var o = state.pendingOrders[i];
+            if (o.pendingHostFill) {
+                if (o.lockedMargin) state.margin += o.lockedMargin;
+                state.pendingOrders.splice(i, 1);
+            }
+        }
     }
     state.isRunning = true;
     startClock();
+    var freezeBtn = document.getElementById("btn-freeze");
+    if (freezeBtn) freezeBtn.classList.remove("on");
+    var playBtn = document.getElementById("btn-play");
+    if (playBtn) playBtn.classList.add("on");
 };
 
 // Bug 3 fix: expose EXCHANGE_RATES so multiplayer.js can perform post-fill

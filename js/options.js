@@ -119,7 +119,7 @@ function closeOptionChain() {
 	document.getElementById("option-chain-modal").classList.add("hidden");
 }
 
-function processOptionTrade(stock, side, optType, strike, expiryType, lots, lotSize, fxRate, isBot, priceOverride) {
+function processOptionTrade(stock, side, optType, strike, expiryType, lots, lotSize, fxRate, isBot, priceOverride, daysToExpiryOverride) {
 	var totalQty;
 	var optionId = stock.ticker + "_" + optType + "_" + strike + "_" + expiryType;
 	var premium;
@@ -131,7 +131,7 @@ function processOptionTrade(stock, side, optType, strike, expiryType, lots, lotS
 			type: optType,
 			strike: strike,
 			expiryType: expiryType,
-			daysToExpiry: getExpiryDays(),
+			daysToExpiry: daysToExpiryOverride || getExpiryDays(),
 			lots: 0,
 			avgPremium: 0,
 			lotSize: lotSize,

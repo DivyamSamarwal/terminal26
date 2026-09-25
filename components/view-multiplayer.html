@@ -1,80 +1,182 @@
 <div id="view-multiplayer" class="hidden">
-    <div class="bank-container" style="max-width: 600px; margin: 40px auto;">
-        <div class="sec-header" style="border-bottom:none; margin-bottom:10px; font-size:16px;">
-            <div>
-                <button id="btn-close-multiplayer" class="btn-sm" style="margin-right:10px; background:var(--bg-2); border:1px solid var(--border); color:var(--text); padding:4px 10px; border-radius:4px; cursor:pointer;" ><i class="fa-solid fa-arrow-left"></i> Back</button>
-                <span><i class="fa-solid fa-users accent"></i> Multiplayer Session</span>
-                <span class="badge mono" style="font-size:10px; background-color: var(--accent); color: #000;">P2P WEBRTC</span>
+    <div class="bank-container mp-container">
+        <!-- Top Navigation Bar -->
+        <div class="sec-header" style="border-bottom:none; margin-bottom:14px; font-size:16px;">
+            <div style="display:flex; align-items:center; gap:8px; flex-wrap:wrap;">
+                <button id="btn-close-multiplayer" class="btn-sm" style="margin-right:6px; background:var(--bg-2); border:1px solid var(--border); color:var(--text); padding:5px 12px; border-radius:6px; cursor:pointer;" title="Return to Terminal">
+                    <i class="fa-solid fa-arrow-left"></i> Back
+                </button>
+                <span style="font-weight:700; color:var(--text-bright); display:inline-flex; align-items:center; gap:8px;">
+                    <i class="fa-solid fa-users accent"></i> Multiplayer Session
+                </span>
+                <span class="badge mono" style="font-size:10px; background-color: var(--accent); color: #000; font-weight:700;">P2P WEBRTC</span>
+                <span class="badge mono" style="font-size:10px; background: rgba(0,230,118,0.15); color: var(--green); border:1px solid rgba(0,230,118,0.3);">STUN/TURN ACTIVE</span>
             </div>
         </div>
         
-        <div class="bank-grid" style="grid-template-columns: 1fr;">
-            <!-- Connection Status -->
-            <div class="bank-card" id="mp-status-card" style="text-align: center; display: none;">
-                <div class="sec-header" style="margin: -20px -20px 20px -20px; padding: 0 20px; background: rgba(0,0,0,0.2); justify-content: center;">
-                    <span><i class="fa-solid fa-signal"></i> Active Connection</span>
+        <!-- Hero Introduction Banner -->
+        <div class="mp-hero">
+            <div class="mp-hero-title">
+                <i class="fa-solid fa-network-wired accent"></i> Synchronized Decentralized Trading Floor
+            </div>
+            <div class="mp-hero-desc">
+                Trade on a live order book with other market participants in real-time. Host an authoritative exchange session or connect as a trader firm to an existing market with zero central server latency.
+            </div>
+            <div class="mp-feature-chips">
+                <span class="mp-chip"><i class="fa-solid fa-bolt"></i> Ultra-Low Latency</span>
+                <span class="mp-chip"><i class="fa-solid fa-layer-group"></i> Shared Order Book</span>
+                <span class="mp-chip"><i class="fa-solid fa-shield-halved"></i> Cross-Network NAT Traversal</span>
+                <span class="mp-chip"><i class="fa-solid fa-clock"></i> Synchronized Clock Engine</span>
+            </div>
+        </div>
+
+        <!-- Connection Status Card (Visible when Connected) -->
+        <div class="bank-card mp-card" id="mp-status-card" style="display: none; margin-bottom: 24px;">
+            <div class="sec-header" style="margin: -24px -24px 20px -24px; padding: 14px 24px; background: rgba(0,0,0,0.3); border-bottom: 1px solid var(--border); justify-content: space-between;">
+                <span style="display:inline-flex; align-items:center; gap:8px; font-weight:600;">
+                    <i class="fa-solid fa-signal" style="color:var(--green);"></i> Active Multiplayer Session
+                </span>
+                <span id="mp-role-text" class="mp-role-pill">Role: Host</span>
+            </div>
+
+            <!-- Status Header -->
+            <div class="mp-status-header">
+                <div class="mp-status-pill">
+                    <span class="mp-pulse-dot"></span>
+                    <span id="mp-status-text">Connected & Synchronized</span>
                 </div>
-                <h3 id="mp-status-text" style="color: var(--green); margin-bottom: 10px;">Connected</h3>
-                <div id="mp-role-text" style="color: var(--text-dim); margin-bottom: 20px;">Role: Host</div>
-                <p id="mp-room-code-display" class="mono" style="font-size: 24px; letter-spacing: 2px; padding: 15px; background: var(--bg-0); border-radius: 8px; border: 1px dashed var(--border); margin-bottom: 20px;">----</p>
-                <div id="mp-health-text" class="mono" style="color: var(--text-dim); font-size: 12px; margin: -8px 0 8px;">Connection: --</div>
-                <div id="mp-health-details" class="mono" style="display:grid; grid-template-columns:repeat(2, minmax(0, 1fr)); gap:6px 14px; color:var(--text-dim); font-size:11px; text-align:left; margin:0 0 20px; padding:10px; background:var(--bg-0); border-radius:8px;">
-                    <span id="mp-route-text">Route: --</span>
-                    <span id="mp-jitter-text">Jitter: --</span>
-                    <span id="mp-last-tick-text">Last host tick: --</span>
-                    <span id="mp-sync-text">Market state: --</span>
-                    <span id="mp-session-text">Session: --</span>
+                <div id="mp-health-text" class="mono" style="color: var(--text-dim); font-size: 12px;">Connection: Measuring ping...</div>
+            </div>
+
+            <!-- Room Code Box with Copy Button -->
+            <div class="mp-code-box" id="mp-room-code-box" title="Click to copy Room Code">
+                <div>
+                    <div style="font-size: 10px; color: var(--text-dim); text-transform: uppercase; letter-spacing: 1px; margin-bottom: 3px;">
+                        <i class="fa-solid fa-key" style="color:var(--accent); margin-right:4px;"></i> Session Room Code
+                    </div>
+                    <div id="mp-room-code-display" class="mp-code-value">----</div>
                 </div>
-                <div id="mp-clients-list" style="margin-bottom: 20px; text-align: left; max-height: 150px; overflow-y: auto; background: var(--bg-0); padding: 10px; border-radius: 8px;">
-                    <div style="color: var(--text-dim); font-size: 12px; margin-bottom: 5px;">Connected Peers:</div>
-                    <ul id="mp-peers-ul" style="list-style: none; padding: 0; margin: 0; font-family: var(--mono); font-size: 13px;">
-                    </ul>
+                <button type="button" id="btn-mp-copy-code" class="mp-copy-btn" title="Copy code to clipboard">
+                    <i class="fa-regular fa-copy"></i> Copy Code
+                </button>
+            </div>
+            <div style="font-size:11px; color:var(--text-dim); margin:-8px 0 16px; padding:0 2px;">
+                <i class="fa-solid fa-circle-info" style="color:var(--accent); margin-right:4px;"></i> Share this room code with peers so they can connect directly to your trading floor.
+            </div>
+
+            <!-- Telemetry Metrics Grid -->
+            <div class="mp-telemetry-grid" id="mp-health-details">
+                <div class="mp-telemetry-item">
+                    <div class="mp-telemetry-label"><i class="fa-solid fa-route"></i> Route</div>
+                    <div class="mp-telemetry-val" id="mp-route-text">Checking...</div>
                 </div>
-                <button class="btn-buy uiverse-btn" id="btn-mp-disconnect" style="width:100%; filter: hue-rotate(150deg);">
+                <div class="mp-telemetry-item">
+                    <div class="mp-telemetry-label"><i class="fa-solid fa-wave-square"></i> Jitter</div>
+                    <div class="mp-telemetry-val" id="mp-jitter-text">--</div>
+                </div>
+                <div class="mp-telemetry-item">
+                    <div class="mp-telemetry-label"><i class="fa-solid fa-clock-rotate-left"></i> Last Host Tick</div>
+                    <div class="mp-telemetry-val" id="mp-last-tick-text">--</div>
+                </div>
+                <div class="mp-telemetry-item">
+                    <div class="mp-telemetry-label"><i class="fa-solid fa-rotate"></i> Market State</div>
+                    <div class="mp-telemetry-val" id="mp-sync-text">--</div>
+                </div>
+                <div class="mp-telemetry-item">
+                    <div class="mp-telemetry-label"><i class="fa-solid fa-stopwatch"></i> Session Duration</div>
+                    <div class="mp-telemetry-val" id="mp-session-text">--</div>
+                </div>
+                <div class="mp-telemetry-item">
+                    <div class="mp-telemetry-label"><i class="fa-solid fa-users"></i> Connected Peers</div>
+                    <div class="mp-telemetry-val" id="mp-peers-count-text">--</div>
+                </div>
+            </div>
+
+            <!-- Connected Peers List -->
+            <div id="mp-clients-list" style="margin-bottom: 20px; text-align: left; background: var(--bg-2); padding: 14px 16px; border-radius: 8px; border: 1px solid var(--border);">
+                <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom: 10px;">
+                    <span style="color: var(--text-dim); font-size: 11px; text-transform: uppercase; letter-spacing: 0.5px; font-weight:600;">
+                        <i class="fa-solid fa-user-group" style="color:var(--accent); margin-right:4px;"></i> Connected Market Participants
+                    </span>
+                    <span id="mp-peer-counter-badge" class="badge mono" style="font-size: 10px;">0</span>
+                </div>
+                <ul id="mp-peers-ul" style="list-style: none; padding: 0; margin: 0; max-height: 160px; overflow-y: auto;">
+                </ul>
+            </div>
+
+            <!-- Disconnect Button -->
+            <button class="btn-buy uiverse-btn" id="btn-mp-disconnect" style="width:100%; filter: hue-rotate(150deg);">
+                <div class="button-outer">
+                    <div class="button-inner">
+                        <span><i class="fa-solid fa-plug-circle-xmark"></i> Disconnect Session</span>
+                    </div>
+                </div>
+            </button>
+        </div>
+
+        <!-- Pre-Connection Lobby (Host / Join Cards) -->
+        <div class="mp-grid">
+            <!-- Host Game Card -->
+            <div class="bank-card mp-card" id="mp-host-card">
+                <div class="mp-card-icon host">
+                    <i class="fa-solid fa-tower-broadcast"></i>
+                </div>
+                <div class="mp-card-title">Host a Market Exchange</div>
+                <div class="mp-card-desc">
+                    Launch an authoritative market instance. You control tick generation, simulation speed, and macro news broadcasts while other traders execute on your book.
+                </div>
+                <ul class="mp-feature-list">
+                    <li><i class="fa-solid fa-circle-check"></i> Authoritative tick engine & price simulation</li>
+                    <li><i class="fa-solid fa-circle-check"></i> Real-time order execution on live liquidity</li>
+                    <li><i class="fa-solid fa-circle-check"></i> Broadcast macro news & market breaks</li>
+                    <li><i class="fa-solid fa-circle-check"></i> Multi-peer WebRTC STUN/TURN traversal</li>
+                </ul>
+                <button class="btn-buy uiverse-btn" id="btn-mp-host" style="margin-top:auto; width:100%;">
                     <div class="button-outer">
                         <div class="button-inner">
-                            <span><i class="fa-solid fa-plug-circle-xmark"></i> Disconnect</span>
+                            <span id="btn-mp-host-label"><i class="fa-solid fa-tower-broadcast"></i> Initialize Host Server</span>
                         </div>
                     </div>
                 </button>
             </div>
 
-            <!-- Host Game -->
-            <div class="bank-card" id="mp-host-card">
-                <div class="sec-header" style="margin: -20px -20px 20px -20px; padding: 0 20px; background: rgba(0,0,0,0.2);">
-                    <span><i class="fa-solid fa-server"></i> Host a Market</span>
+            <!-- Join Game Card -->
+            <div class="bank-card mp-card" id="mp-join-card">
+                <div class="mp-card-icon join">
+                    <i class="fa-solid fa-link"></i>
                 </div>
-                <p style="color: var(--text-dim); font-size: 13px; margin-bottom: 20px; line-height: 1.5;">
-                    Create a P2P market instance. You will control the tick generation, simulation speed, and macro news. Other players can join your room and trade on your order book.
-                </p>
-                <button class="btn-buy uiverse-btn" id="btn-mp-host" style="margin-top:auto;width:100%;">
+                <div class="mp-card-title">Join a Market Exchange</div>
+                <div class="mp-card-desc">
+                    Connect directly to another player's market using their Room Code. Your local market clock will synchronize instantly to the host's timeline.
+                </div>
+                <div class="fg" style="margin-bottom: 16px;">
+                    <label style="font-size: 11px; text-transform: uppercase; letter-spacing: 0.5px; color: var(--text-dim); display:flex; justify-content:space-between;">
+                        <span>Session Room Code</span>
+                        <span style="font-family: var(--mono); color: var(--accent); font-size: 10px;">PRESS [ENTER] TO JOIN</span>
+                    </label>
+                    <input type="text" id="mp-join-code" class="fc mono" placeholder="e.g. DALAL-A1B2" autocomplete="off" spellcheck="false" maxlength="30" style="text-transform: uppercase; font-size: 15px; letter-spacing: 2px; padding: 10px 14px;">
+                </div>
+                <ul class="mp-feature-list">
+                    <li><i class="fa-solid fa-circle-check"></i> Instant state synchronization upon connection</li>
+                    <li><i class="fa-solid fa-circle-check"></i> Trade equity & options against shared liquidity</li>
+                    <li><i class="fa-solid fa-circle-check"></i> Fully synchronized macro news headlines</li>
+                    <li><i class="fa-solid fa-circle-check"></i> Non-custodial local portfolio preservation</li>
+                </ul>
+                <button class="btn-buy uiverse-btn" id="btn-mp-join" style="margin-top:auto; width:100%; filter: hue-rotate(280deg);">
                     <div class="button-outer">
                         <div class="button-inner">
-                            <span><i class="fa-solid fa-tower-broadcast"></i> Initialize Host Server</span>
+                            <span id="btn-mp-join-label"><i class="fa-solid fa-plug"></i> Connect to Host</span>
                         </div>
                     </div>
                 </button>
             </div>
+        </div>
 
-            <!-- Join Game -->
-            <div class="bank-card" id="mp-join-card">
-                <div class="sec-header" style="margin: -20px -20px 20px -20px; padding: 0 20px; background: rgba(0,0,0,0.2);">
-                    <span><i class="fa-solid fa-right-to-bracket"></i> Join a Market</span>
-                </div>
-                <p style="color: var(--text-dim); font-size: 13px; margin-bottom: 20px; line-height: 1.5;">
-                    Enter a Room Code to connect to another player's market. Your local simulation clock will be disabled and synced to the host.
-                </p>
-                <div class="fg">
-                    <label>Room Code</label>
-                    <input type="text" id="mp-join-code" class="fc mono" placeholder="e.g. DALAL-A1B2" style="text-transform: uppercase; font-size: 16px; letter-spacing: 2px;">
-                </div>
-                <button class="btn-buy uiverse-btn" id="btn-mp-join" style="margin-top:auto;width:100%; filter: hue-rotate(280deg);">
-                    <div class="button-outer">
-                        <div class="button-inner">
-                            <span><i class="fa-solid fa-link"></i> Connect to Host</span>
-                        </div>
-                    </div>
-                </button>
+        <!-- Cross-Network Tip / Helpful Info Footer -->
+        <div class="mp-info-tip">
+            <i class="fa-solid fa-lightbulb"></i>
+            <div>
+                <strong>Cross-Network P2P Enabled:</strong> If connecting across different Wi-Fi networks, mobile hotspots, or corporate firewalls, our multi-STUN/TURN network relays will automatically negotiate direct or relayed NAT traversal in 5–15 seconds.
             </div>
         </div>
     </div>

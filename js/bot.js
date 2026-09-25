@@ -1,4 +1,4 @@
-import { EXCHANGE_RATES, LOT_SIZES, calcBollingerBands, calcEMA, calcMACD, calcPremium, calcRSI, calcSMA, fmtCur, generateStrikes, getDayFraction, getExpiryDays, isMarketOpen, pcg, processEquityTrade, processOptionTrade, renderAll, renderTopBar, state, stockMap, toast, selectStock } from './app.js';
+import { EXCHANGE_RATES, LOT_SIZES, calcBollingerBands, calcEMA, calcMACD, calcPremium, calcRSI, calcSMA, fmtCur, generateStrikes, getDayFraction, isMarketOpen, pcg, processEquityTrade, processOptionTrade, renderAll, renderTopBar, state, stockMap, toast, selectStock } from './app.js';
 
 // ==================== ALGO BOT MANAGER ====================
 
@@ -76,7 +76,7 @@ BotInstance.prototype.tick = function() {
 		posOpt = state.optionsPositions[this.optionId];
 		if (posOpt) {
 			var remainingDays = posOpt.daysToExpiry - getDayFraction();
-			currentMetric = calcPremium(posOpt.type, posOpt.strike, ltp, remainingDays);
+			currentMetric = calcPremium(posOpt.type, posOpt.strike, ltp, Math.max(0.01, remainingDays), stock.iv);
 		}
 	}
 
@@ -149,16 +149,16 @@ BotInstance.prototype.tick = function() {
 				// Options Exit
 				posOpt = state.optionsPositions[this.optionId];
 				if (posOpt && posOpt.lots > 0) {
-					var parts = this.optionId.split("_");
-					var optType = parts[1];
-					var strike = parseFloat(parts[2]);
-					var expiryType = parts[3];
+					var optType = posOpt.type;
+					var strike = posOpt.strike;
+					var expiryType = posOpt.expiryType;
+					var optLotSize = posOpt.lotSize || (LOT_SIZES[this.ticker] || 100);
 
-					var lotsToSell = Math.min(posOpt.lots, Math.floor(this.qty / (posOpt.lotSize || (LOT_SIZES[this.ticker] || 100))));
+					var lotsToSell = Math.min(posOpt.lots, Math.floor(this.qty / optLotSize));
 					if (lotsToSell > 0) {
-						if (processOptionTrade(stock, "SELL", optType, strike, expiryType, lotsToSell, (posOpt.lotSize || (LOT_SIZES[this.ticker] || 100)), fxRate, true)) {
+						if (processOptionTrade(stock, "SELL", optType, strike, expiryType, lotsToSell, optLotSize, fxRate, true)) {
 							// For options, currentMetric (ltp) is the current premium. entryPrice was the premium we bought at.
-							pnlNative = (currentMetric - this.entryPrice) * (lotsToSell * (posOpt.lotSize || (LOT_SIZES[this.ticker] || 100))) * fxRate;
+							pnlNative = (currentMetric - this.entryPrice) * (lotsToSell * optLotSize) * fxRate;
 							if (typeof BotManager !== "undefined" && BotManager.recordAnalytics) {
 								BotManager.recordAnalytics(this.strategy, pnlNative);
 							}
@@ -407,18 +407,26 @@ BotInstance.prototype.tick = function() {
 			strike = strikes.reduce(function(prev, curr) {
 				return (Math.abs(curr - ltp) < Math.abs(prev - ltp) ? curr : prev);
 			});
-			expiryType = "W1";
-			remainingDays = getExpiryDays() - getDayFraction();
+			var nextWeekly = Math.ceil(state.day / 5) * 5;
+			if (nextWeekly < state.day) nextWeekly = state.day + (5 - (state.day % 5));
+			expiryType = String(nextWeekly);
+			var botDaysToExpiry = nextWeekly - state.day + 1;
+			remainingDays = Math.max(0.01, botDaysToExpiry - getDayFraction());
 			
-			var premium = calcPremium(optType, strike, ltp, Math.max(0.01, remainingDays));
+			var premium = calcPremium(optType, strike, ltp, remainingDays, stock.iv);
 			var lotSize = LOT_SIZES[this.ticker] || 100;
 			var lotCostINR = (premium * lotSize) * fxRate;
 			
 			var lots = lotCostINR > 0 ? Math.floor(riskAmount / lotCostINR) : 0;
+			if (lots === 0 && riskAmount > 0 && state.margin >= lotCostINR) {
+				lots = 1;
+			}
 			if (lots > 0) {
-				if (processOptionTrade(stock, "BUY", optType, strike, expiryType, lots, lotSize, fxRate, true)) {
+				if (processOptionTrade(stock, "BUY", optType, strike, expiryType, lots, lotSize, fxRate, true, undefined, botDaysToExpiry)) {
 					this.qty = lots * lotSize;
-					var fillPrice = state.optionsPositions[stock.ticker + "_" + optType + "_" + strike + "_" + expiryType].avgPremium;
+					var optPosKey = stock.ticker + "_" + optType + "_" + strike + "_" + expiryType;
+					var optPos = state.optionsPositions[optPosKey];
+					var fillPrice = optPos ? optPos.avgPremium : premium;
 					this.entryPrice = fillPrice;
 					this.highestPrice = fillPrice;
 					this.lowestPrice = fillPrice;
@@ -426,7 +434,7 @@ BotInstance.prototype.tick = function() {
 					this.tpPrice = this._customTP || (fillPrice * (1 + (this.tpPct / 100)));
 					this.state = signal;
 					this._customSL = null; this._customTP = null;
-					this.optionId = stock.ticker + "_" + optType + "_" + strike + "_" + expiryType;
+					this.optionId = optPosKey;
 					toast("Bot ("+this.ticker+")", "Opened " + signal + " Options position ("+lots+" Lots)", "success");
 				}
 			}
@@ -491,12 +499,16 @@ var BotManager = {
   				} else if (bot.asset === "OPTIONS" && bot.optionId) {
   					var posOpt = state.optionsPositions[bot.optionId];
   					if (posOpt && posOpt.lots > 0) {
-  						var parts = bot.optionId.split("_");
-  						var lotsToSell = Math.min(posOpt.lots, Math.floor(bot.qty / posOpt.lotSize));
+  						var optType = posOpt.type;
+  						var optStrike = posOpt.strike;
+  						var optExpiryType = posOpt.expiryType;
+  						var optLotSize = posOpt.lotSize || (LOT_SIZES[bot.ticker] || 100);
+  						var lotsToSell = Math.min(posOpt.lots, Math.floor(bot.qty / optLotSize));
   						if (lotsToSell > 0) {
-  							if (processOptionTrade(stock, "SELL", parts[1], parseFloat(parts[2]), parts[3], lotsToSell, posOpt.lotSize, fxRate, true)) {
-								var ltpPrem = calcPremium(parts[1], parseFloat(parts[2]), stock.ltp, getExpiryDays() - getDayFraction());
-								pnlNative = (ltpPrem - bot.entryPrice) * (lotsToSell * posOpt.lotSize) * fxRate;
+  							if (processOptionTrade(stock, "SELL", optType, optStrike, optExpiryType, lotsToSell, optLotSize, fxRate, true)) {
+								var optDays = Math.max(0.01, posOpt.daysToExpiry - getDayFraction());
+								var ltpPrem = calcPremium(optType, optStrike, stock.ltp, optDays, stock.iv);
+								pnlNative = (ltpPrem - bot.entryPrice) * (lotsToSell * optLotSize) * fxRate;
 								if (typeof BotManager !== "undefined" && BotManager.recordAnalytics) {
 									BotManager.recordAnalytics(bot.strategy, pnlNative);
 								}
@@ -653,7 +665,7 @@ var BotManager = {
 					var posOpt = state.optionsPositions[bot.optionId];
 					if (posOpt) {
 						var remainingDays = posOpt.daysToExpiry - getDayFraction();
-						var currentPrem = calcPremium(posOpt.type, posOpt.strike, ltp, remainingDays);
+						var currentPrem = calcPremium(posOpt.type, posOpt.strike, ltp, Math.max(0.01, remainingDays), stock.iv);
 						pnlNative = (currentPrem - posOpt.avgPremium) * bot.qty;
 						displayLtp = currentPrem;
 					}
@@ -681,57 +693,10 @@ var BotManager = {
 };
 
 // Bind UI event once on load
-document.addEventListener("DOMContentLoaded", function() {
-	var btnToggle = document.getElementById("btn-toggle-bot");
-	// Note: btn-toggle-bot has its listener bound in app.js as well!
-	// We need to unbind old app.js listeners if they exist, or just overwrite it.
-	if (btnToggle) {
-		// Replacing the element clears existing event listeners set in app.js
-		var newBtnToggle = btnToggle.cloneNode(true);
-		btnToggle.parentNode.replaceChild(newBtnToggle, btnToggle);
-		newBtnToggle.addEventListener("click", function() {
-			BotManager.toggle();
-		});
-	}
-	
-	var botRiskSlider = document.getElementById("bot-risk-slider");
-	if (botRiskSlider) {
-		var newSlider = botRiskSlider.cloneNode(true);
-		botRiskSlider.parentNode.replaceChild(newSlider, botRiskSlider);
-		newSlider.addEventListener("input", function() {
-			document.getElementById("bot-risk-val").textContent = this.value + "%";
-		});
-	}
-
-	// Hook BotManager.updateUI into the global window.selectStock so switching
-	// stocks while a bot is active refreshes the bot state display. We wrap
-	// the already-exposed window.selectStock (set in main.js) rather than the
-	// ES-module import to avoid hoisting/recursion issues.
-	var _origWinSelectStock = window.selectStock;
-	if (typeof _origWinSelectStock === "function") {
-		window.selectStock = function(stockArg) {
-			_origWinSelectStock(stockArg);
-			var t = (typeof stockArg === "string") ? stockArg : (stockArg ? stockArg.ticker : null);
-			if (t) BotManager.updateUI(t);
-		};
-	}
-
-	// Initialize Custom Bots from LocalStorage (merged from second DOMContentLoaded)
-	if (!state || !state.customStrategies || Object.keys(state.customStrategies).length === 0) {
-		try {
-			var saved = localStorage.getItem("customStrategies");
-			if (saved) {
-				if (!state.customStrategies) state.customStrategies = {};
-				state.customStrategies = JSON.parse(saved);
-				if (typeof updateStrategyDropdown === "function") {
-					updateStrategyDropdown();
-				}
-			}
-		} catch(e) {
-			console.error("Failed to load custom bots", e);
-		}
-	}
-});
+// NOTE: Bot button, slider, selectStock wrapping, and custom strategy loading
+// are initialized in ui_events.js initUIEvents(), which runs AFTER loadComponents()
+// has injected the HTML templates into the DOM. Doing it here in DOMContentLoaded
+// would race against the async component loading and silently fail.
 
 // --- Custom Bot Hot-Reloading ---
 function updateStrategyDropdown() {
